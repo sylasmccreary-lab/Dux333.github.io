@@ -214,6 +214,45 @@ export class GamePreviewBuilder {
       ? ""
       : `<script>window.location.replace("${this.escapeJsString(meta.redirectUrl)}");</script>`;
 
+    // Parse description sections for structured rendering
+    const descriptionLines = meta.description.split("\n");
+    let descriptionHtml = "";
+
+    if (descriptionLines.length > 1) {
+      // Multi-line structured format (private lobby)
+      descriptionHtml = descriptionLines
+        .map((line) => {
+          if (line.startsWith("Game Options:")) {
+            const options = line
+              .replace("Game Options: ", "")
+              .split(" | ")
+              .map(
+                (opt) =>
+                  `<span class="badge">${this.escapeHtml(opt.trim())}</span>`,
+              )
+              .join("");
+            return `<div class="section"><div class="section-title">Game Options</div><div class="badges">${options}</div></div>`;
+          } else if (line.startsWith("Disabled Units:")) {
+            const units = line
+              .replace("Disabled Units: ", "")
+              .split(" | ")
+              .map(
+                (unit) =>
+                  `<span class="badge badge-disabled">${this.escapeHtml(unit.trim())}</span>`,
+              )
+              .join("");
+            return `<div class="section"><div class="section-title">Disabled Units</div><div class="badges">${units}</div></div>`;
+          } else if (line === "Join now!") {
+            return `<div class="cta">${this.escapeHtml(line)}</div>`;
+          }
+          return `<p>${this.escapeHtml(line)}</p>`;
+        })
+        .join("");
+    } else {
+      // Single line format (public lobby or finished game)
+      descriptionHtml = `<p class="simple-desc">${this.escapeHtml(meta.description)}</p>`;
+    }
+
     return `<!doctype html>
 <html lang="en">
   <head>
@@ -228,21 +267,135 @@ export class GamePreviewBuilder {
     <meta property="og:type" content="website" />
     ${refreshTag}
     <style>
-      body { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; background: #0f172a; color: #e2e8f0; margin: 0; padding: 2rem; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
-      .card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 1.5rem; max-width: 520px; box-shadow: 0 18px 40px rgba(0,0,0,0.35); }
-      h1 { margin: 0 0 0.5rem; font-size: 1.4rem; }
-      p { margin: 0 0 1rem; line-height: 1.4; }
-      a { color: #93c5fd; text-decoration: none; font-weight: 600; }
-      a:hover { text-decoration: underline; }
-      .pill { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.35rem 0.75rem; border-radius: 999px; background: rgba(255,255,255,0.08); color: #cbd5e1; font-size: 0.9rem; }
+      * { box-sizing: border-box; }
+      body { 
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); 
+        color: #e2e8f0; 
+        margin: 0; 
+        padding: 1.5rem; 
+        display: flex; 
+        align-items: center; 
+        justify-content: center; 
+        min-height: 100vh; 
+      }
+      .card { 
+        background: linear-gradient(to bottom, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.9));
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(148, 163, 184, 0.1);
+        border-radius: 16px; 
+        padding: 2rem; 
+        max-width: 600px; 
+        width: 100%;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.03);
+      }
+      h1 { 
+        margin: 0 0 1.5rem; 
+        font-size: 1.5rem; 
+        font-weight: 700; 
+        color: #f1f5f9;
+        letter-spacing: -0.025em;
+      }
+      .simple-desc { 
+        margin: 0 0 1.5rem; 
+        line-height: 1.6; 
+        color: #cbd5e1;
+        font-size: 0.95rem;
+      }
+      .section { 
+        margin-bottom: 1.25rem; 
+        padding: 1rem;
+        background: rgba(15, 23, 42, 0.5);
+        border-radius: 10px;
+        border: 1px solid rgba(148, 163, 184, 0.08);
+      }
+      .section-title { 
+        font-size: 0.75rem; 
+        font-weight: 600; 
+        text-transform: uppercase; 
+        letter-spacing: 0.05em; 
+        color: #94a3b8; 
+        margin-bottom: 0.75rem; 
+      }
+      .badges { 
+        display: flex; 
+        flex-wrap: wrap; 
+        gap: 0.5rem; 
+      }
+      .badge { 
+        display: inline-flex;
+        align-items: center;
+        padding: 0.4rem 0.75rem; 
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(37, 99, 235, 0.15));
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        color: #93c5fd; 
+        border-radius: 6px; 
+        font-size: 0.85rem; 
+        font-weight: 500;
+        white-space: nowrap;
+      }
+      .badge-disabled { 
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(220, 38, 38, 0.15));
+        border-color: rgba(239, 68, 68, 0.3);
+        color: #fca5a5; 
+      }
+      .cta { 
+        margin-top: 1.5rem; 
+        padding: 0.875rem 1.5rem; 
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+        color: white; 
+        text-align: center; 
+        border-radius: 8px; 
+        font-weight: 600; 
+        font-size: 0.95rem;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        letter-spacing: 0.025em;
+      }
+      .lobby-code { 
+        display: inline-flex; 
+        align-items: center; 
+        padding: 0.5rem 1rem; 
+        border-radius: 8px; 
+        background: rgba(15, 23, 42, 0.6); 
+        border: 1px solid rgba(148, 163, 184, 0.15);
+        color: #cbd5e1; 
+        font-size: 0.9rem; 
+        font-family: "Monaco", "Courier New", monospace;
+        letter-spacing: 0.05em;
+        margin-top: 1rem;
+      }
+      .lobby-code-label {
+        color: #94a3b8;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.5rem;
+      }
+      a { 
+        color: #60a5fa; 
+        text-decoration: none; 
+        font-weight: 600; 
+        transition: color 0.2s;
+      }
+      a:hover { 
+        color: #93c5fd; 
+      }
+      .footer {
+        margin-top: 1.5rem;
+        padding-top: 1rem;
+        border-top: 1px solid rgba(148, 163, 184, 0.1);
+      }
     </style>
   </head>
   <body>
     <main class="card" role="main">
       <h1>${this.escapeHtml(meta.title)}</h1>
-      <p>${this.escapeHtml(meta.description)}</p>
-      <div class="pill">Lobby code: ${this.escapeHtml(joinId)}</div>
-      <p style="margin-top: 1rem;"><a href="${this.escapeHtml(meta.redirectUrl)}">Open lobby</a></p>
+      ${descriptionHtml}
+      <div class="footer">
+        <div class="lobby-code-label">Lobby Code</div>
+        <div class="lobby-code">${this.escapeHtml(joinId)}</div>
+      </div>
     </main>
     ${redirectScript}
   </body>
