@@ -238,7 +238,7 @@ const serveJoinPreview = async (
   const html = renderJoinPreview(meta, joinId, isBotRequest(req));
 
   res
-    .status(lobby ? 200 : 404)
+    .status(200)
     .setHeader("Cache-Control", "no-store")
     .type("html")
     .send(html);
