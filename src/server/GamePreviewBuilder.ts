@@ -100,10 +100,19 @@ export class GamePreviewBuilder {
     lobby: GameInfo | null,
     publicInfo: ExternalGameInfo | null,
   ): PreviewMeta {
-    const joinUrl = `${origin}/game/${gameID}`;
-    const redirectUrl = joinUrl;
-
     const isFinished = !!publicInfo?.info?.end;
+    const isPrivate = lobby?.gameConfig?.gameType === "Private";
+
+    // Build URLs with state parameter
+    let joinUrl = `${origin}/game/${gameID}`;
+    let redirectUrl = joinUrl;
+
+    if (!isFinished && isPrivate) {
+      joinUrl = `${joinUrl}?lobby`;
+    } else if (isFinished) {
+      redirectUrl = `${redirectUrl}?replay`;
+    }
+
     const config = publicInfo?.info?.config ?? {};
     const players = publicInfo?.info?.players ?? [];
 
@@ -159,7 +168,6 @@ export class GamePreviewBuilder {
       description = parts.join(" • ");
     } else if (lobby) {
       const gc = lobby.gameConfig;
-      const isPrivate = gc?.gameType === "Private";
 
       if (isPrivate) {
         // Private lobby: show detailed game settings
