@@ -8,6 +8,7 @@ import { fileURLToPath } from "url";
 import { getServerConfigFromServer } from "../core/configuration/ConfigLoader";
 import { GameInfo, ID } from "../core/Schemas";
 import { generateID } from "../core/Util";
+import { ExternalGameInfo, GamePreviewBuilder } from "./GamePreviewBuilder";
 import { logger } from "./Logger";
 import { MapPlaylist } from "./MapPlaylist";
 
@@ -58,14 +59,6 @@ const BOT_USER_AGENTS = [
   "pinterestbot",
 ];
 
-const escapeHtml = (value: string): string =>
-  value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-
 const isBotRequest = (req: Request): boolean => {
   const ua = req.get("user-agent")?.toLowerCase() ?? "";
   return BOT_USER_AGENTS.some((token) => ua.includes(token));
@@ -100,25 +93,6 @@ const fetchLobbyInfo = async (gameID: string): Promise<GameInfo | null> => {
   }
 };
 
-type ExternalGameInfo = {
-  info?: {
-    config?: {
-      gameMap?: string;
-      gameMode?: string;
-      gameType?: string;
-      difficulty?: string;
-      bots?: number;
-      maxPlayers?: number;
-    };
-    players?: unknown[];
-    winner?: string[];
-    duration?: number;
-    num_turns?: number;
-    start?: number;
-    end?: number;
-  };
-};
-
 const fetchPublicGameInfo = async (
   gameID: string,
 ): Promise<ExternalGameInfo | null> => {
@@ -137,141 +111,6 @@ const fetchPublicGameInfo = async (
   } finally {
     clearTimeout(timeout);
   }
-};
-
-type PreviewMeta = {
-  title: string;
-  description: string;
-  image: string;
-  joinUrl: string;
-  redirectUrl: string;
-};
-
-const buildPreview = (
-  gameID: string,
-  origin: string,
-  lobby: GameInfo | null,
-  publicInfo: ExternalGameInfo | null,
-): PreviewMeta => {
-  const joinUrl = `${origin}/join/${gameID}`;
-  const redirectUrl = joinUrl;
-
-  const isFinished = !!publicInfo?.info?.end;
-
-  const players =
-    lobby?.numClients ??
-    lobby?.clients?.length ??
-    publicInfo?.info?.players?.length;
-  const maxPlayers =
-    lobby?.gameConfig?.maxPlayers ?? publicInfo?.info?.config?.maxPlayers;
-  const map = lobby?.gameConfig?.gameMap ?? publicInfo?.info?.config?.gameMap;
-  const mode =
-    lobby?.gameConfig?.gameMode ??
-    publicInfo?.info?.config?.gameMode ??
-    publicInfo?.info?.config?.gameType;
-  const difficulty =
-    lobby?.gameConfig?.difficulty ?? publicInfo?.info?.config?.difficulty;
-  const bots = lobby?.gameConfig?.bots ?? publicInfo?.info?.config?.bots;
-  const winnerArray = publicInfo?.info?.winner;
-  const winner =
-    winnerArray && winnerArray.length > 1 ? winnerArray[1] : undefined;
-  const turns = publicInfo?.info?.num_turns;
-  const duration = publicInfo?.info?.duration;
-
-  const image = map
-    ? `${origin}/maps/${encodeURIComponent(map)}.png`
-    : `${origin}/images/GameplayScreenshot.png`;
-
-  const details: string[] = [];
-
-  if (mode) details.push(mode);
-  if (map) details.push(map);
-  if (difficulty) details.push(difficulty);
-  if (maxPlayers !== undefined) {
-    details.push(`${players ?? 0}/${maxPlayers} players`);
-  } else if (players !== undefined) {
-    details.push(`${players} players`);
-  }
-  if (bots !== undefined && bots > 0) {
-    details.push(`${bots} bots`);
-  }
-  if (turns !== undefined) {
-    details.push(`${turns} turns`);
-  }
-
-  const title = details.length > 0 ? details.join(" • ") : "OpenFront Game";
-
-  let description = "";
-  if (isFinished) {
-    if (winner) {
-      description = `Winner: ${winner}`;
-    } else {
-      description = "Game finished";
-    }
-    if (duration !== undefined) {
-      const mins = Math.floor(duration / 60);
-      const secs = duration % 60;
-      description += ` • ${mins}m ${secs}s`;
-    }
-  } else if (lobby) {
-    description = `Join this ${mode ?? "game"} and start playing!`;
-  } else {
-    description = `Game ${gameID}`;
-  }
-
-  return { title, description, image, joinUrl, redirectUrl };
-};
-
-const renderJoinPreview = (
-  meta: PreviewMeta,
-  joinId: string,
-  botRequest: boolean,
-): string => {
-  const refreshTag = botRequest
-    ? ""
-    : `<meta http-equiv="refresh" content="0; url=${meta.redirectUrl}">`;
-
-  const redirectScript = botRequest
-    ? ""
-    : `<script>window.location.replace("${meta.redirectUrl}");</script>`;
-
-  return `<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>${escapeHtml(meta.title)}</title>
-    <link rel="canonical" href="${meta.joinUrl}" />
-    <meta property="og:title" content="${escapeHtml(meta.title)}" />
-    <meta property="og:description" content="${escapeHtml(meta.description)}" />
-    <meta property="og:image" content="${meta.image}" />
-    <meta property="og:url" content="${meta.joinUrl}" />
-    <meta property="og:type" content="website" />
-    <meta name="twitter:card" content="summary" />
-    <meta name="twitter:title" content="${escapeHtml(meta.title)}" />
-    <meta name="twitter:description" content="${escapeHtml(meta.description)}" />
-    <meta name="twitter:image" content="${meta.image}" />
-    ${refreshTag}
-    <style>
-      body { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; background: #0f172a; color: #e2e8f0; margin: 0; padding: 2rem; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
-      .card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 1.5rem; max-width: 520px; box-shadow: 0 18px 40px rgba(0,0,0,0.35); }
-      h1 { margin: 0 0 0.5rem; font-size: 1.4rem; }
-      p { margin: 0 0 1rem; line-height: 1.4; }
-      a { color: #93c5fd; text-decoration: none; font-weight: 600; }
-      a:hover { text-decoration: underline; }
-      .pill { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.35rem 0.75rem; border-radius: 999px; background: rgba(255,255,255,0.08); color: #cbd5e1; font-size: 0.9rem; }
-    </style>
-  </head>
-  <body>
-    <main class="card" role="main">
-      <h1>${escapeHtml(meta.title)}</h1>
-      <p>${escapeHtml(meta.description)}</p>
-      <div class="pill">Lobby code: ${escapeHtml(joinId)}</div>
-      <p style="margin-top: 1rem;"><a href="${meta.redirectUrl}">Open lobby</a></p>
-    </main>
-    ${redirectScript}
-  </body>
-</html>`;
 };
 
 const serveJoinPreview = async (
@@ -294,8 +133,13 @@ const serveJoinPreview = async (
   ]);
 
   if (botRequest) {
-    const meta = buildPreview(joinId, origin, lobby, publicInfo);
-    const html = renderJoinPreview(meta, joinId, true);
+    const meta = GamePreviewBuilder.buildPreview(
+      joinId,
+      origin,
+      lobby,
+      publicInfo,
+    );
+    const html = GamePreviewBuilder.renderPreview(meta, joinId, true);
     res
       .status(200)
       .setHeader("Cache-Control", "no-store")
