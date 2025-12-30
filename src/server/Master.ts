@@ -54,6 +54,7 @@ const BOT_USER_AGENTS = [
   "applebot",
   "snapchat",
   "whatsapp",
+  "pinterestbot",
 ];
 
 const escapeHtml = (value: string): string =>
