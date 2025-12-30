@@ -85,6 +85,15 @@ export class GamePreviewBuilder {
       .replace(/'/g, "&#39;");
   }
 
+  private static escapeJsString(value: string): string {
+    return value
+      .replace(/\\/g, "\\\\")
+      .replace(/"/g, '\\"')
+      .replace(/\n/g, "\\n")
+      .replace(/\r/g, "\\r")
+      .replace(/\t/g, "\\t");
+  }
+
   static buildPreview(
     gameID: string,
     origin: string,
@@ -158,11 +167,11 @@ export class GamePreviewBuilder {
   ): string {
     const refreshTag = botRequest
       ? ""
-      : `<meta http-equiv="refresh" content="0; url=${meta.redirectUrl}">`;
+      : `<meta http-equiv="refresh" content="0; url=${this.escapeHtml(meta.redirectUrl)}">`;
 
     const redirectScript = botRequest
       ? ""
-      : `<script>window.location.replace("${meta.redirectUrl}");</script>`;
+      : `<script>window.location.replace("${this.escapeJsString(meta.redirectUrl)}");</script>`;
 
     return `<!doctype html>
 <html lang="en">
@@ -170,11 +179,11 @@ export class GamePreviewBuilder {
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>${this.escapeHtml(meta.title)}</title>
-    <link rel="canonical" href="${meta.joinUrl}" />
+    <link rel="canonical" href="${this.escapeHtml(meta.joinUrl)}" />
     <meta property="og:title" content="${this.escapeHtml(meta.title)}" />
     <meta property="og:description" content="${this.escapeHtml(meta.description)}" />
-    <meta property="og:image" content="${meta.image}" />
-    <meta property="og:url" content="${meta.joinUrl}" />
+    <meta property="og:image" content="${this.escapeHtml(meta.image)}" />
+    <meta property="og:url" content="${this.escapeHtml(meta.joinUrl)}" />
     <meta property="og:type" content="website" />
     ${refreshTag}
     <style>
@@ -192,7 +201,7 @@ export class GamePreviewBuilder {
       <h1>${this.escapeHtml(meta.title)}</h1>
       <p>${this.escapeHtml(meta.description)}</p>
       <div class="pill">Lobby code: ${this.escapeHtml(joinId)}</div>
-      <p style="margin-top: 1rem;"><a href="${meta.redirectUrl}">Open lobby</a></p>
+      <p style="margin-top: 1rem;"><a href="${this.escapeHtml(meta.redirectUrl)}">Open lobby</a></p>
     </main>
     ${redirectScript}
   </body>
