@@ -830,7 +830,7 @@ export class HostLobbyModal extends LitElement {
   private async copyToClipboard() {
     try {
       await navigator.clipboard.writeText(
-        `${location.origin}/game/${this.lobbyId}`,
+        `${location.origin}/game/${this.lobbyId}?lobby`,
       );
       this.copySuccess = true;
       setTimeout(() => {
