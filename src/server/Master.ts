@@ -15,23 +15,25 @@ import { MapPlaylist } from "./MapPlaylist";
 const config = getServerConfigFromServer();
 const playlist = new MapPlaylist();
 
+const BOT_USER_AGENTS = [
+  "discordbot",
+  "twitterbot",
+  "slackbot",
+  "facebookexternalhit",
+  "linkedinbot",
+  "telegrambot",
+  "applebot",
+  "snapchat",
+  "whatsapp",
+  "pinterestbot",
+];
+
 const joinPreviewLimiter = rateLimit({
   windowMs: 1000, // 1 second
   max: 100, // limit each IP to 100 requests per windowMs
   skip: (req) => {
     const ua = req.get("user-agent")?.toLowerCase() ?? "";
-    return [
-      "discordbot",
-      "twitterbot",
-      "slackbot",
-      "facebookexternalhit",
-      "linkedinbot",
-      "telegrambot",
-      "applebot",
-      "snapchat",
-      "whatsapp",
-      "pinterestbot",
-    ].some((bot) => ua.includes(bot));
+    return BOT_USER_AGENTS.some((bot) => ua.includes(bot));
   },
 });
 
@@ -45,19 +47,6 @@ const log = logger.child({ comp: "m" });
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 app.use(express.json());
-
-const BOT_USER_AGENTS = [
-  "discordbot",
-  "twitterbot",
-  "slackbot",
-  "facebookexternalhit",
-  "linkedinbot",
-  "telegrambot",
-  "applebot",
-  "snapchat",
-  "whatsapp",
-  "pinterestbot",
-];
 
 const isBotRequest = (req: Request): boolean => {
   const ua = req.get("user-agent")?.toLowerCase() ?? "";
