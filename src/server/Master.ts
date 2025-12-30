@@ -88,6 +88,11 @@ type ExternalGameInfo = {
       maxPlayers?: number;
     };
     players?: unknown[];
+    winner?: string | string[];
+    duration?: number;
+    turns?: number;
+    start?: string;
+    end?: string;
   };
 };
 
@@ -125,7 +130,8 @@ const buildPreview = (
 ): PreviewMeta => {
   const joinUrl = `${origin}/join/${gameID}`;
   const redirectUrl = joinUrl;
-  const image = `${origin}/images/GameplayScreenshot.png`;
+
+  const isFinished = !!publicInfo?.info?.end;
 
   const players =
     lobby?.numClients ??
@@ -141,26 +147,51 @@ const buildPreview = (
   const difficulty =
     lobby?.gameConfig?.difficulty ?? publicInfo?.info?.config?.difficulty;
   const bots = lobby?.gameConfig?.bots ?? publicInfo?.info?.config?.bots;
+  const winner = publicInfo?.info?.winner;
+  const turns = publicInfo?.info?.turns;
+  const duration = publicInfo?.info?.duration;
 
-  const details = [
-    mode ?? undefined,
-    map ? `Map: ${map}` : undefined,
-    difficulty ? `Difficulty: ${difficulty}` : undefined,
-    maxPlayers !== undefined
-      ? `Players: ${players ?? 0}/${maxPlayers}`
-      : players !== undefined
-        ? `Players: ${players}`
-        : undefined,
-    bots !== undefined ? `Bots: ${bots}` : undefined,
-  ].filter(Boolean);
+  const image = map
+    ? `${origin}/maps/${encodeURIComponent(map)}.png`
+    : `${origin}/images/GameplayScreenshot.png`;
 
-  const title = lobby
-    ? `Join OpenFront lobby ${gameID}`
-    : `OpenFront lobby ${gameID}`;
-  const description =
-    details.length > 0
-      ? `Join this lobby • ${details.join(" • ")}`
-      : "Join this OpenFront lobby and start playing.";
+  const details: string[] = [];
+
+  if (mode) details.push(mode);
+  if (map) details.push(map);
+  if (difficulty) details.push(difficulty);
+  if (maxPlayers !== undefined) {
+    details.push(`${players ?? 0}/${maxPlayers} players`);
+  } else if (players !== undefined) {
+    details.push(`${players} players`);
+  }
+  if (bots !== undefined && bots > 0) {
+    details.push(`${bots} bots`);
+  }
+  if (turns !== undefined) {
+    details.push(`${turns} turns`);
+  }
+
+  const title = details.length > 0 ? details.join(" • ") : "OpenFront Game";
+
+  let description = "";
+  if (isFinished) {
+    if (winner) {
+      const winnerStr = Array.isArray(winner) ? winner.join(", ") : winner;
+      description = `Winner: ${winnerStr}`;
+    } else {
+      description = "Game finished";
+    }
+    if (duration !== undefined) {
+      const mins = Math.floor(duration / 60);
+      const secs = duration % 60;
+      description += ` • ${mins}m ${secs}s`;
+    }
+  } else if (lobby) {
+    description = `Join this ${mode || "game"} and start playing!`;
+  } else {
+    description = `Game ${gameID}`;
+  }
 
   return { title, description, image, joinUrl, redirectUrl };
 };
@@ -190,7 +221,7 @@ const renderJoinPreview = (
     <meta property="og:image" content="${meta.image}" />
     <meta property="og:url" content="${meta.joinUrl}" />
     <meta property="og:type" content="website" />
-    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:card" content="summary" />
     <meta name="twitter:title" content="${escapeHtml(meta.title)}" />
     <meta name="twitter:description" content="${escapeHtml(meta.description)}" />
     <meta name="twitter:image" content="${meta.image}" />
