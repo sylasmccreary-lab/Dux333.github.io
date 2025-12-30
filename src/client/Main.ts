@@ -600,7 +600,11 @@ class Client {
         if (window.location.hash === "" || window.location.hash === "#") {
           history.replaceState(null, "", window.location.origin + "#refresh");
         }
-        history.pushState(null, "", `/join/${lobby.gameID}#join=${lobby.gameID}`);
+        history.pushState(
+          null,
+          "",
+          `/join/${lobby.gameID}#join=${lobby.gameID}`,
+        );
       },
     );
   }
