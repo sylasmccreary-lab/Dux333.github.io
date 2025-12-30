@@ -119,18 +119,19 @@ type ExternalGameInfo = {
 const fetchPublicGameInfo = async (
   gameID: string,
 ): Promise<ExternalGameInfo | null> => {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 1500);
   try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 1500);
     const response = await fetch(`https://api.openfront.io/game/${gameID}`, {
       signal: controller.signal,
     });
-    clearTimeout(timeout);
     if (!response.ok) return null;
     return (await response.json()) as ExternalGameInfo;
   } catch (error) {
     log.warn("failed to fetch public game info", { gameID, error });
     return null;
+  } finally {
+    clearTimeout(timeout);
   }
 };
 
