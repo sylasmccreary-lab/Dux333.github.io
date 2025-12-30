@@ -139,7 +139,7 @@ export class GamePreviewBuilder {
     const title = isFinished
       ? `${mode ?? "Game"} on ${map ?? "Unknown Map"}`
       : mode && map
-        ? `${mode} • ${map} • ${maxPlayers ? `${activePlayers}/${maxPlayers}` : `${activePlayers}`} players`
+        ? `${mode} • ${map}`
         : "OpenFront Game";
 
     let description = "";
