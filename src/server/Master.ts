@@ -15,7 +15,7 @@ const config = getServerConfigFromServer();
 const playlist = new MapPlaylist();
 
 const joinPreviewLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
+  windowMs: 1000, // 1 second
   max: 100, // limit each IP to 100 requests per windowMs
   skip: (req) => {
     const ua = req.get("user-agent")?.toLowerCase() ?? "";
