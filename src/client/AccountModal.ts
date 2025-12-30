@@ -144,10 +144,8 @@ export class AccountModal extends LitElement {
 
   private viewGame(gameId: string): void {
     this.close();
-    const path = location.pathname;
-    const { search } = location;
-    const hash = `#join=${encodeURIComponent(gameId)}`;
-    const newUrl = `${path}${search}${hash}`;
+    const encodedGameId = encodeURIComponent(gameId);
+    const newUrl = `/join/${encodedGameId}#join=${encodedGameId}`;
 
     history.pushState({ join: gameId }, "", newUrl);
     window.dispatchEvent(new HashChangeEvent("hashchange"));

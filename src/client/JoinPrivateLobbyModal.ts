@@ -137,16 +137,25 @@ export class JoinPrivateLobbyModal extends LitElement {
   }
 
   private extractLobbyIdFromUrl(input: string): string {
-    if (input.startsWith("http")) {
-      if (input.includes("#join=")) {
-        const params = new URLSearchParams(input.split("#")[1]);
-        return params.get("join") ?? input;
-      } else if (input.includes("join/")) {
-        return input.split("join/")[1];
-      } else {
-        return input;
-      }
-    } else {
+    if (!input.startsWith("http")) {
+      return input;
+    }
+
+    try {
+      const url = new URL(input);
+      const joinParam = url.searchParams.get("join");
+      if (joinParam) return joinParam;
+
+      const hashParams = new URLSearchParams(url.hash.replace(/^#/, ""));
+      const joinFromHash = hashParams.get("join");
+      if (joinFromHash) return joinFromHash;
+
+      const match = url.pathname.match(/join\/([A-Za-z0-9]{8})/);
+      if (match) return match[1];
+
+      return input;
+    } catch (error) {
+      console.warn("Failed to parse lobby URL", error);
       return input;
     }
   }

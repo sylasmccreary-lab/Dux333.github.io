@@ -476,13 +476,12 @@ class Client {
       return;
     }
 
-    // Fallback to hash-based join for non-CrazyGames environments
-    if (decodedHash.startsWith("#join=")) {
-      const lobbyId = decodedHash.substring(6); // Remove "#join="
-      if (lobbyId && ID.safeParse(lobbyId).success) {
-        this.joinModal.open(lobbyId);
-        console.log(`joining lobby ${lobbyId}`);
-      }
+    const lobbyId = this.extractJoinCodeFromUrl(decodedHash);
+    if (lobbyId) {
+      this.updateJoinUrlForShare(lobbyId);
+      this.joinModal.open(lobbyId);
+      console.log(`joining lobby ${lobbyId}`);
+      return;
     }
     if (decodedHash.startsWith("#affiliate=")) {
       const affiliateCode = decodedHash.replace("#affiliate=", "");
@@ -601,9 +600,42 @@ class Client {
         if (window.location.hash === "" || window.location.hash === "#") {
           history.replaceState(null, "", window.location.origin + "#refresh");
         }
-        history.pushState(null, "", `#join=${lobby.gameID}`);
+        history.pushState(null, "", `/join/${lobby.gameID}#join=${lobby.gameID}`);
       },
     );
+  }
+
+  private extractJoinCodeFromUrl(decodedHash: string): string | null {
+    const searchParams = new URLSearchParams(window.location.search);
+    const joinFromQuery = searchParams.get("join");
+    if (joinFromQuery && ID.safeParse(joinFromQuery).success) {
+      return joinFromQuery;
+    }
+
+    const pathMatch = window.location.pathname.match(
+      /^\/join\/([A-Za-z0-9]{8})/,
+    );
+    if (pathMatch && ID.safeParse(pathMatch[1]).success) {
+      return pathMatch[1];
+    }
+
+    if (decodedHash.startsWith("#join=")) {
+      const lobbyId = decodedHash.substring(6);
+      if (lobbyId && ID.safeParse(lobbyId).success) {
+        return lobbyId;
+      }
+    }
+
+    return null;
+  }
+
+  private updateJoinUrlForShare(lobbyId: string) {
+    const targetUrl = `/join/${lobbyId}#join=${lobbyId}`;
+    const currentUrl = `${window.location.pathname}${window.location.hash}`;
+
+    if (currentUrl !== targetUrl) {
+      history.replaceState(null, "", targetUrl);
+    }
   }
 
   private async handleLeaveLobby(/* event: CustomEvent */) {
