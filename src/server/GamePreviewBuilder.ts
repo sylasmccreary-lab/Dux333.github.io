@@ -100,7 +100,7 @@ export class GamePreviewBuilder {
     lobby: GameInfo | null,
     publicInfo: ExternalGameInfo | null,
   ): PreviewMeta {
-    const joinUrl = `${origin}/join/${gameID}`;
+    const joinUrl = `${origin}/game/${gameID}`;
     const redirectUrl = joinUrl;
 
     const isFinished = !!publicInfo?.info?.end;

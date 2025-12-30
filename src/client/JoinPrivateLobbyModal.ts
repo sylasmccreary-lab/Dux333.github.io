@@ -150,7 +150,7 @@ export class JoinPrivateLobbyModal extends LitElement {
       const joinFromHash = hashParams.get("join");
       if (joinFromHash) return joinFromHash;
 
-      const match = url.pathname.match(/join\/([A-Za-z0-9]{8})/);
+      const match = url.pathname.match(/game\/([A-Za-z0-9]{8})/);
       if (match) return match[1];
 
       return input;

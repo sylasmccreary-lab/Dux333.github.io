@@ -140,7 +140,7 @@ const serveJoinPreview = async (
   res.sendFile(path.join(__dirname, "../../static/index.html"));
 };
 
-app.get("/join/:gameId", joinPreviewLimiter, (req, res) => {
+app.get("/game/:gameId", joinPreviewLimiter, (req, res) => {
   serveJoinPreview(req, res, req.params.gameId).catch((error) => {
     log.error("failed to render join preview", { error });
     res.status(500).send("Unable to render lobby preview");

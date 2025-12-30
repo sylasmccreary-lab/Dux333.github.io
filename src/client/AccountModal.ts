@@ -145,7 +145,7 @@ export class AccountModal extends LitElement {
   private viewGame(gameId: string): void {
     this.close();
     const encodedGameId = encodeURIComponent(gameId);
-    const newUrl = `/join/${encodedGameId}`;
+    const newUrl = `/game/${encodedGameId}`;
 
     history.pushState({ join: gameId }, "", newUrl);
     window.dispatchEvent(

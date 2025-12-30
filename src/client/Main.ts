@@ -601,7 +601,7 @@ class Client {
         if (window.location.hash === "" || window.location.hash === "#") {
           history.replaceState(null, "", window.location.origin + "#refresh");
         }
-        history.pushState(null, "", `/join/${lobby.gameID}`);
+        history.pushState(null, "", `/game/${lobby.gameID}`);
       },
     );
   }
@@ -614,7 +614,7 @@ class Client {
     }
 
     const pathMatch = window.location.pathname.match(
-      /^\/join\/([A-Za-z0-9]{8})/,
+      /^\/game\/([A-Za-z0-9]{8})/,
     );
     if (pathMatch && ID.safeParse(pathMatch[1]).success) {
       return pathMatch[1];
@@ -624,7 +624,7 @@ class Client {
   }
 
   private updateJoinUrlForShare(lobbyId: string) {
-    const targetUrl = `/join/${lobbyId}`;
+    const targetUrl = `/game/${lobbyId}`;
     const currentUrl = window.location.pathname;
 
     if (currentUrl !== targetUrl) {
