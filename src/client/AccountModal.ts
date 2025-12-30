@@ -148,7 +148,9 @@ export class AccountModal extends LitElement {
     const newUrl = `/join/${encodedGameId}`;
 
     history.pushState({ join: gameId }, "", newUrl);
-    window.dispatchEvent(new HashChangeEvent("hashchange"));
+    window.dispatchEvent(
+      new CustomEvent("join-changed", { detail: { gameId: encodedGameId } }),
+    );
   }
 
   private renderLogoutButton(): TemplateResult {

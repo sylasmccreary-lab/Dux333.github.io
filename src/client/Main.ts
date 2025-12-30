@@ -376,6 +376,7 @@ class Client {
     // Handle browser navigation & manual hash edits
     window.addEventListener("popstate", onHashUpdate);
     window.addEventListener("hashchange", onHashUpdate);
+    window.addEventListener("join-changed", onHashUpdate);
 
     function updateSliderProgress(slider: HTMLInputElement) {
       const percent =
