@@ -195,7 +195,9 @@ export class GamePreviewBuilder {
           );
         }
 
-        sections.push("Join now!");
+        if (!isFinished) {
+          sections.push("Join now!");
+        }
         description = sections.join("\n");
       } else {
         // Public lobby: basic info
