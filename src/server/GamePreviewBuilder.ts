@@ -158,31 +158,42 @@ export class GamePreviewBuilder {
       parts.push(`Players: ${playerCount}`);
       description = parts.join(" • ");
     } else if (lobby) {
-      const parts: string[] = [];
       const gc = lobby.gameConfig;
       const isPrivate = gc?.gameType === "Private";
 
       if (isPrivate) {
         // Private lobby: show detailed game settings
-        if (gc?.gameMapSize && gc.gameMapSize !== "Normal") {
-          parts.push(`${gc.gameMapSize} Map`);
-        }
-        if (difficulty) parts.push(difficulty);
-        if (gc?.infiniteGold) parts.push("Infinite Gold");
-        if (gc?.infiniteTroops) parts.push("Infinite Troops");
-        if (gc?.instantBuild) parts.push("Instant Build");
-        if (gc?.randomSpawn) parts.push("Random Spawn");
-        if (gc?.disableNations) parts.push("Nations Disabled");
-        if (gc?.donateTroops) parts.push("Troop Donations Enabled");
-        if (gc?.disabledUnits && gc.disabledUnits.length > 0) {
-          parts.push(`${gc.disabledUnits.join(", ")} Disabled`);
-        }
-      }
+        const gameOptions: string[] = [];
 
-      if (isPrivate) {
-        parts.push("Join now!");
+        if (gc?.gameMapSize && gc.gameMapSize !== "Normal") {
+          gameOptions.push(`${gc.gameMapSize} Map`);
+        }
+        if (difficulty) gameOptions.push(difficulty);
+        if (gc?.infiniteGold) gameOptions.push("Infinite Gold");
+        if (gc?.infiniteTroops) gameOptions.push("Infinite Troops");
+        if (gc?.instantBuild) gameOptions.push("Instant Build");
+        if (gc?.randomSpawn) gameOptions.push("Random Spawn");
+        if (gc?.disableNations) gameOptions.push("Nations Disabled");
+        if (gc?.donateTroops) gameOptions.push("Troop Donations Enabled");
+
+        const sections: string[] = [];
+        if (gameOptions.length > 0) {
+          sections.push(`Game Options: ${gameOptions.join(" | ")}`);
+        }
+
+        if (gc?.disabledUnits && gc.disabledUnits.length > 0) {
+          sections.push(`Disabled Units: ${gc.disabledUnits.join(" | ")}`);
+        }
+
+        sections.push("Join now!");
+        description = sections.join("\n");
+      } else {
+        // Public lobby: basic info
+        const parts: string[] = [];
+        if (difficulty) parts.push(difficulty);
+        if (bots !== undefined && bots > 0) parts.push(`${bots} bots`);
+        description = parts.join(" • ");
       }
-      description = parts.join(" • ");
     } else {
       description = `Game ${gameID}`;
     }
