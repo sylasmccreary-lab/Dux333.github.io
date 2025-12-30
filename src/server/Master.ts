@@ -13,6 +13,26 @@ import { MapPlaylist } from "./MapPlaylist";
 
 const config = getServerConfigFromServer();
 const playlist = new MapPlaylist();
+
+const joinPreviewLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  skip: (req) => {
+    const ua = req.get("user-agent")?.toLowerCase() ?? "";
+    return [
+      "discordbot",
+      "twitterbot",
+      "slackbot",
+      "facebookexternalhit",
+      "linkedinbot",
+      "telegrambot",
+      "applebot",
+      "snapchat",
+      "whatsapp",
+    ].some((bot) => ua.includes(bot));
+  },
+});
+
 const readyWorkers = new Set();
 
 const app = express();
@@ -88,11 +108,11 @@ type ExternalGameInfo = {
       maxPlayers?: number;
     };
     players?: unknown[];
-    winner?: string | string[];
+    winner?: string[];
     duration?: number;
-    turns?: number;
-    start?: string;
-    end?: string;
+    num_turns?: number;
+    start?: number;
+    end?: number;
   };
 };
 
@@ -147,8 +167,10 @@ const buildPreview = (
   const difficulty =
     lobby?.gameConfig?.difficulty ?? publicInfo?.info?.config?.difficulty;
   const bots = lobby?.gameConfig?.bots ?? publicInfo?.info?.config?.bots;
-  const winner = publicInfo?.info?.winner;
-  const turns = publicInfo?.info?.turns;
+  const winnerArray = publicInfo?.info?.winner;
+  const winner =
+    winnerArray && winnerArray.length > 1 ? winnerArray[1] : undefined;
+  const turns = publicInfo?.info?.num_turns;
   const duration = publicInfo?.info?.duration;
 
   const image = map
@@ -177,8 +199,7 @@ const buildPreview = (
   let description = "";
   if (isFinished) {
     if (winner) {
-      const winnerStr = Array.isArray(winner) ? winner.join(", ") : winner;
-      description = `Winner: ${winnerStr}`;
+      description = `Winner: ${winner}`;
     } else {
       description = "Game finished";
     }
@@ -188,7 +209,7 @@ const buildPreview = (
       description += ` • ${mins}m ${secs}s`;
     }
   } else if (lobby) {
-    description = `Join this ${mode || "game"} and start playing!`;
+    description = `Join this ${mode ?? "game"} and start playing!`;
   } else {
     description = `Game ${gameID}`;
   }
@@ -281,7 +302,7 @@ const serveJoinPreview = async (
   res.sendFile(path.join(__dirname, "../../static/index.html"));
 };
 
-app.get("/join/:gameId", (req, res) => {
+app.get("/join/:gameId", joinPreviewLimiter, (req, res) => {
   serveJoinPreview(req, res, req.params.gameId).catch((error) => {
     log.error("failed to render join preview", { error });
     res.status(500).send("Unable to render lobby preview");
