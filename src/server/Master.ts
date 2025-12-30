@@ -29,6 +29,7 @@ const joinPreviewLimiter = rateLimit({
       "applebot",
       "snapchat",
       "whatsapp",
+      "pinterestbot",
     ].some((bot) => ua.includes(bot));
   },
 });
@@ -124,7 +125,8 @@ const fetchPublicGameInfo = async (
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 1500);
   try {
-    const response = await fetch(`https://api.openfront.io/game/${gameID}`, {
+    const apiDomain = process.env.API_DOMAIN ?? `api.${config.domain()}`;
+    const response = await fetch(`https://${apiDomain}/game/${gameID}`, {
       signal: controller.signal,
     });
     if (!response.ok) return null;
