@@ -181,8 +181,10 @@ export class GamePreviewBuilder {
           sections.push(`Game Options: ${gameOptions.join(" | ")}`);
         }
 
-        if (gc?.disabledUnits && gc.disabledUnits.length > 0) {
-          sections.push(`Disabled Units: ${gc.disabledUnits.join(" | ")}`);
+        if (Array.isArray(gc?.disabledUnits) && gc.disabledUnits.length > 0) {
+          sections.push(
+            `Disabled Units: ${gc.disabledUnits.map(String).join(" | ")}`,
+          );
         }
 
         sections.push("Join now!");
