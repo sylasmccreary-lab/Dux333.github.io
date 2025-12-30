@@ -252,6 +252,8 @@ export class WinModal extends LitElement implements Layer {
     await this.loadPatternContent();
     this.isVisible = true;
     this.requestUpdate();
+    // Update URL to ?replay when win screen appears
+    window.history.replaceState(null, "", `${window.location.pathname}?replay`);
     setTimeout(() => {
       this.showButtons = true;
       this.requestUpdate();
