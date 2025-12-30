@@ -112,8 +112,19 @@ export class GamePreviewBuilder {
       : (lobby?.numClients ?? lobby?.clients?.length ?? players.length);
     const maxPlayers = lobby?.gameConfig?.maxPlayers ?? config.maxPlayers;
     const map = lobby?.gameConfig?.gameMap ?? config.gameMap;
-    const mode =
+    let mode =
       lobby?.gameConfig?.gameMode ?? config.gameMode ?? config.gameType;
+    const playerTeams = lobby?.gameConfig?.playerTeams;
+
+    // Format team mode display
+    if (!isFinished && mode === "Team" && playerTeams) {
+      if (typeof playerTeams === "string") {
+        mode = playerTeams; // e.g., "Quads"
+      } else if (typeof playerTeams === "number") {
+        mode = `${playerTeams} Teams`;
+      }
+    }
+
     const difficulty = lobby?.gameConfig?.difficulty ?? config.difficulty;
     const bots = lobby?.gameConfig?.bots ?? config.bots;
     const winner = this.parseWinner(publicInfo?.info?.winner, players);
