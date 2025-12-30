@@ -159,10 +159,29 @@ export class GamePreviewBuilder {
       description = parts.join(" • ");
     } else if (lobby) {
       const parts: string[] = [];
-      if (mode) parts.push(mode);
-      if (difficulty) parts.push(difficulty);
-      if (bots !== undefined && bots > 0) parts.push(`${bots} bots`);
-      parts.push("Join now!");
+      const gc = lobby.gameConfig;
+      const isPrivate = gc?.gameType === "Private";
+
+      if (isPrivate) {
+        // Private lobby: show detailed game settings
+        if (gc?.gameMapSize && gc.gameMapSize !== "Normal") {
+          parts.push(`${gc.gameMapSize} Map`);
+        }
+        if (difficulty) parts.push(difficulty);
+        if (gc?.infiniteGold) parts.push("Infinite Gold");
+        if (gc?.infiniteTroops) parts.push("Infinite Troops");
+        if (gc?.instantBuild) parts.push("Instant Build");
+        if (gc?.randomSpawn) parts.push("Random Spawn");
+        if (gc?.disableNations) parts.push("Nations Disabled");
+        if (gc?.donateTroops) parts.push("Troop Donations Enabled");
+        if (gc?.disabledUnits && gc.disabledUnits.length > 0) {
+          parts.push(`${gc.disabledUnits.join(", ")} Disabled`);
+        }
+      }
+
+      if (isPrivate) {
+        parts.push("Join now!");
+      }
       description = parts.join(" • ");
     } else {
       description = `Game ${gameID}`;
