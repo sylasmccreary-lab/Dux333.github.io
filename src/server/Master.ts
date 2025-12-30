@@ -123,7 +123,11 @@ const serveJoinPreview = async (
   ]);
 
   if (debug) {
-    res.json({ lobby, publicInfo });
+    res
+      .setHeader("Cache-Control", "no-cache, no-store, must-revalidate")
+      .setHeader("Pragma", "no-cache")
+      .setHeader("Expires", "0")
+      .json({ lobby, publicInfo });
     return;
   }
 
