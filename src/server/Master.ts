@@ -124,7 +124,7 @@ const buildPreview = (
   publicInfo: ExternalGameInfo | null,
 ): PreviewMeta => {
   const joinUrl = `${origin}/join/${gameID}`;
-  const redirectUrl = `${origin}/`;
+  const redirectUrl = joinUrl;
   const image = `${origin}/images/GameplayScreenshot.png`;
 
   const players =
@@ -172,11 +172,11 @@ const renderJoinPreview = (
 ): string => {
   const refreshTag = botRequest
     ? ""
-    : `<meta http-equiv="refresh" content="0; url=${meta.redirectUrl}#join=${joinId}">`;
+    : `<meta http-equiv="refresh" content="0; url=${meta.redirectUrl}">`;
 
   const redirectScript = botRequest
     ? ""
-    : `<script>window.location.replace("${meta.redirectUrl}#join=${joinId}");</script>`;
+    : `<script>window.location.replace("${meta.redirectUrl}");</script>`;
 
   return `<!doctype html>
 <html lang="en">
@@ -210,7 +210,7 @@ const renderJoinPreview = (
       <h1>${escapeHtml(meta.title)}</h1>
       <p>${escapeHtml(meta.description)}</p>
       <div class="pill">Lobby code: ${escapeHtml(joinId)}</div>
-      <p style="margin-top: 1rem;"><a href="${meta.redirectUrl}#join=${joinId}">Open lobby</a></p>
+      <p style="margin-top: 1rem;"><a href="${meta.redirectUrl}">Open lobby</a></p>
     </main>
     ${redirectScript}
   </body>
@@ -230,18 +230,24 @@ const serveJoinPreview = async (
 
   const joinId = parsed.data;
   const origin = requestOrigin(req);
+  const botRequest = isBotRequest(req);
   const [lobby, publicInfo] = await Promise.all([
     fetchLobbyInfo(joinId),
     fetchPublicGameInfo(joinId),
   ]);
-  const meta = buildPreview(joinId, origin, lobby, publicInfo);
-  const html = renderJoinPreview(meta, joinId, isBotRequest(req));
 
-  res
-    .status(200)
-    .setHeader("Cache-Control", "no-store")
-    .type("html")
-    .send(html);
+  if (botRequest) {
+    const meta = buildPreview(joinId, origin, lobby, publicInfo);
+    const html = renderJoinPreview(meta, joinId, true);
+    res
+      .status(200)
+      .setHeader("Cache-Control", "no-store")
+      .type("html")
+      .send(html);
+    return;
+  }
+
+  res.sendFile(path.join(__dirname, "../../static/index.html"));
 };
 
 app.get("/join/:gameId", (req, res) => {

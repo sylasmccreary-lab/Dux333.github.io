@@ -476,7 +476,7 @@ class Client {
       return;
     }
 
-    const lobbyId = this.extractJoinCodeFromUrl(decodedHash);
+    const lobbyId = this.extractJoinCodeFromUrl();
     if (lobbyId) {
       this.updateJoinUrlForShare(lobbyId);
       this.joinModal.open(lobbyId);
@@ -600,16 +600,12 @@ class Client {
         if (window.location.hash === "" || window.location.hash === "#") {
           history.replaceState(null, "", window.location.origin + "#refresh");
         }
-        history.pushState(
-          null,
-          "",
-          `/join/${lobby.gameID}#join=${lobby.gameID}`,
-        );
+        history.pushState(null, "", `/join/${lobby.gameID}`);
       },
     );
   }
 
-  private extractJoinCodeFromUrl(decodedHash: string): string | null {
+  private extractJoinCodeFromUrl(): string | null {
     const searchParams = new URLSearchParams(window.location.search);
     const joinFromQuery = searchParams.get("join");
     if (joinFromQuery && ID.safeParse(joinFromQuery).success) {
@@ -623,19 +619,12 @@ class Client {
       return pathMatch[1];
     }
 
-    if (decodedHash.startsWith("#join=")) {
-      const lobbyId = decodedHash.substring(6);
-      if (lobbyId && ID.safeParse(lobbyId).success) {
-        return lobbyId;
-      }
-    }
-
     return null;
   }
 
   private updateJoinUrlForShare(lobbyId: string) {
-    const targetUrl = `/join/${lobbyId}#join=${lobbyId}`;
-    const currentUrl = `${window.location.pathname}${window.location.hash}`;
+    const targetUrl = `/join/${lobbyId}`;
+    const currentUrl = window.location.pathname;
 
     if (currentUrl !== targetUrl) {
       history.replaceState(null, "", targetUrl);
