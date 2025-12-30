@@ -147,14 +147,14 @@ const serveJoinPreview = async (
     if (isPrivate) {
       // Private lobby: shorter cache (10 seconds), ETag based on settings
       const settingsHash = JSON.stringify(lobby?.gameConfig);
-      const etag = crypto.createHash('sha256').update(settingsHash).digest('hex');
+      const etag = crypto
+        .createHash("sha256")
+        .update(settingsHash)
+        .digest("hex");
       res
         .status(200)
         .setHeader("Cache-Control", "public, max-age=10")
-        .setHeader(
-          "ETag",
-          `"${etag}"`,
-        )
+        .setHeader("ETag", `"${etag}"`)
         .type("html")
         .send(html);
     } else {
@@ -162,14 +162,14 @@ const serveJoinPreview = async (
       const gamestateHash = isFinished
         ? JSON.stringify(publicInfo?.info)
         : JSON.stringify(lobby);
-      const etag = crypto.createHash('sha256').update(gamestateHash).digest('hex');
+      const etag = crypto
+        .createHash("sha256")
+        .update(gamestateHash)
+        .digest("hex");
       res
         .status(200)
         .setHeader("Cache-Control", "public, max-age=60")
-        .setHeader(
-          "ETag",
-          `"${etag}"`,
-        )
+        .setHeader("ETag", `"${etag}"`)
         .type("html")
         .send(html);
     }
