@@ -159,6 +159,13 @@ app.get("/join/:gameId", joinPreviewLimiter, (req, res) => {
 });
 
 app.use(
+  "/maps",
+  express.static(path.join(__dirname, "../../resources/maps"), {
+    maxAge: "1y",
+  }),
+);
+
+app.use(
   express.static(path.join(__dirname, "../../static"), {
     maxAge: "1y", // Set max-age to 1 year for all static assets
     setHeaders: (res, path) => {

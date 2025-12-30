@@ -111,9 +111,10 @@ export class GamePreviewBuilder {
     const turns = publicInfo?.info?.num_turns;
     const duration = publicInfo?.info?.duration;
 
-    const image = map
-      ? `${origin}/maps/${encodeURIComponent(map)}.png`
-      : `${origin}/images/GameplayScreenshot.png`;
+    const mapThumbnail = map
+      ? `${origin}/maps/${encodeURIComponent(map.toLowerCase())}/thumbnail.webp`
+      : null;
+    const image = mapThumbnail ?? `${origin}/images/GameplayScreenshot.png`;
 
     const title = isFinished
       ? `${mode ?? "Game"} on ${map ?? "Unknown Map"}`
