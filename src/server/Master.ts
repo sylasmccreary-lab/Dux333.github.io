@@ -139,11 +139,38 @@ const serveJoinPreview = async (
       publicInfo,
     );
     const html = GamePreviewBuilder.renderPreview(meta, joinId, true);
-    res
-      .status(200)
-      .setHeader("Cache-Control", "no-store")
-      .type("html")
-      .send(html);
+
+    // Determine if public or private lobby
+    const isPrivate = lobby?.gameConfig?.gameType === "Private";
+    const isFinished = !!publicInfo?.info?.end;
+
+    if (isPrivate) {
+      // Private lobby: shorter cache (10 seconds), ETag based on settings
+      const settingsHash = JSON.stringify(lobby?.gameConfig);
+      res
+        .status(200)
+        .setHeader("Cache-Control", "public, max-age=10")
+        .setHeader(
+          "ETag",
+          `"${Buffer.from(settingsHash).toString("base64").slice(0, 27)}"`,
+        )
+        .type("html")
+        .send(html);
+    } else {
+      // Public lobby: longer cache (60 seconds), ETag based on gamestate
+      const gamestateHash = isFinished
+        ? JSON.stringify(publicInfo?.info)
+        : JSON.stringify(lobby);
+      res
+        .status(200)
+        .setHeader("Cache-Control", "public, max-age=60")
+        .setHeader(
+          "ETag",
+          `"${Buffer.from(gamestateHash).toString("base64").slice(0, 27)}"`,
+        )
+        .type("html")
+        .send(html);
+    }
     return;
   }
 
