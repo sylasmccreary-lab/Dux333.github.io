@@ -124,7 +124,7 @@ const buildPreview = (
   publicInfo: ExternalGameInfo | null,
 ): PreviewMeta => {
   const joinUrl = `${origin}/join/${gameID}`;
-  const redirectUrl = `${origin}/?join=${gameID}`;
+  const redirectUrl = `${origin}/`;
   const image = `${origin}/images/GameplayScreenshot.png`;
 
   const players =
