@@ -116,10 +116,16 @@ const serveJoinPreview = async (
   const joinId = parsed.data;
   const origin = requestOrigin(req);
   const botRequest = isBotRequest(req);
+  const debug = req.query.debug === "1";
   const [lobby, publicInfo] = await Promise.all([
     fetchLobbyInfo(joinId),
     fetchPublicGameInfo(joinId),
   ]);
+
+  if (debug) {
+    res.json({ lobby, publicInfo });
+    return;
+  }
 
   if (botRequest) {
     const meta = GamePreviewBuilder.buildPreview(
