@@ -77,9 +77,9 @@ const requestOrigin = (req: Request): string => {
 };
 
 const fetchLobbyInfo = async (gameID: string): Promise<GameInfo | null> => {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 1500);
   try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 1500);
     const workerPort = config.workerPort(gameID);
     const response = await fetch(
       `http://127.0.0.1:${workerPort}/api/game/${gameID}`,
@@ -87,13 +87,14 @@ const fetchLobbyInfo = async (gameID: string): Promise<GameInfo | null> => {
         signal: controller.signal,
       },
     );
-    clearTimeout(timeout);
     if (!response.ok) return null;
     const data = (await response.json()) as GameInfo;
     return data;
   } catch (error) {
     log.warn("failed to fetch lobby info", { gameID, error });
     return null;
+  } finally {
+    clearTimeout(timeout);
   }
 };
 
