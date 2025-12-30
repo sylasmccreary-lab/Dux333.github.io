@@ -69,7 +69,8 @@ export class GamePreviewBuilder {
       return idToName.get(clientId) ?? clientId;
     }
 
-    return winnerArray.join(" ");
+    // Unknown winner format - don't display confusing output
+    return undefined;
   }
 
   private static countActivePlayers(players: PlayerInfo[] | undefined): number {
