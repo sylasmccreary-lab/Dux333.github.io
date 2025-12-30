@@ -121,7 +121,7 @@ export class GamePreviewBuilder {
     const duration = publicInfo?.info?.duration;
 
     const mapThumbnail = map
-      ? `${origin}/maps/${encodeURIComponent(map.toLowerCase())}/thumbnail.webp`
+      ? `${origin}/maps/${encodeURIComponent(map.toLowerCase().replace(/\s+/g, ""))}/thumbnail.webp`
       : null;
     const image = mapThumbnail ?? `${origin}/images/GameplayScreenshot.png`;
 
