@@ -1,4 +1,5 @@
 import { GameInfo } from "../core/Schemas";
+import { GameMode } from "../core/game/Game";
 
 type PlayerInfo = {
   clientID?: string;
@@ -124,7 +125,7 @@ export function buildPreview(
     : (lobby?.numClients ?? lobby?.clients?.length ?? players.length);
   const maxPlayers = lobby?.gameConfig?.maxPlayers ?? config.maxPlayers;
   const map = lobby?.gameConfig?.gameMap ?? config.gameMap;
-  let mode = lobby?.gameConfig?.gameMode ?? config.gameMode ?? config.gameType;
+  let mode = lobby?.gameConfig?.gameMode ?? config.gameMode ?? GameMode.FFA;
   const playerTeams = lobby?.gameConfig?.playerTeams;
 
   // Format team mode display
