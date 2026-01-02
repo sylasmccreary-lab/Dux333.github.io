@@ -89,7 +89,7 @@ declare global {
   interface DocumentEventMap {
     "join-lobby": CustomEvent<JoinLobbyEvent>;
     "kick-player": CustomEvent;
-    "join-changed": CustomEvent<{ gameId: string }>;
+    "join-changed": CustomEvent;
   }
 }
 
