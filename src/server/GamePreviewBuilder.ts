@@ -6,7 +6,7 @@ type PlayerInfo = {
   stats?: unknown;
 };
 
-type ExternalGameInfo = {
+export type ExternalGameInfo = {
   info?: {
     config?: {
       gameMap?: string;
@@ -26,7 +26,7 @@ type ExternalGameInfo = {
   };
 };
 
-type PreviewMeta = {
+export type PreviewMeta = {
   title: string;
   description: string;
   image: string;
@@ -34,73 +34,72 @@ type PreviewMeta = {
   redirectUrl: string;
 };
 
-export class GamePreviewBuilder {
-  private static formatDuration(seconds: number | undefined): string {
-    if (seconds === undefined) return "N/A";
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    const hours = Math.floor(mins / 60);
-    const minutes = mins % 60;
-    if (hours) return `${hours}h ${minutes}m ${secs}s`;
-    if (minutes) return `${minutes}m ${secs}s`;
-    return `${secs}s`;
+function formatDuration(seconds: number | undefined): string {
+  if (seconds === undefined) return "N/A";
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  const hours = Math.floor(mins / 60);
+  const minutes = mins % 60;
+  if (hours) return `${hours}h ${minutes}m ${secs}s`;
+  if (minutes) return `${minutes}m ${secs}s`;
+  return `${secs}s`;
+}
+
+function parseWinner(
+  winnerArray: string[] | undefined,
+  players: PlayerInfo[] | undefined,
+): string | undefined {
+  if (!winnerArray || winnerArray.length < 2) return undefined;
+
+  const idToName = new Map(
+    (players ?? []).map((p) => [p.clientID, p.username]),
+  );
+
+  if (winnerArray[0] === "team" && winnerArray.length >= 3) {
+    const playerIds = winnerArray.slice(2);
+    const names = playerIds
+      .map((id) => idToName.get(id) ?? id)
+      .filter(Boolean);
+    return names.length > 0 ? names.join(", ") : undefined;
   }
 
-  private static parseWinner(
-    winnerArray: string[] | undefined,
-    players: PlayerInfo[] | undefined,
-  ): string | undefined {
-    if (!winnerArray || winnerArray.length < 2) return undefined;
-
-    const idToName = new Map(
-      (players ?? []).map((p) => [p.clientID, p.username]),
-    );
-
-    if (winnerArray[0] === "team" && winnerArray.length >= 3) {
-      const playerIds = winnerArray.slice(2);
-      const names = playerIds
-        .map((id) => idToName.get(id) ?? id)
-        .filter(Boolean);
-      return names.length > 0 ? names.join(", ") : undefined;
-    }
-
-    if (winnerArray[0] === "player" && winnerArray.length >= 2) {
-      const clientId = winnerArray[1];
-      return idToName.get(clientId) ?? clientId;
-    }
-
-    // Unknown winner format - don't display confusing output
-    return undefined;
+  if (winnerArray[0] === "player" && winnerArray.length >= 2) {
+    const clientId = winnerArray[1];
+    return idToName.get(clientId) ?? clientId;
   }
 
-  private static countActivePlayers(players: PlayerInfo[] | undefined): number {
-    return (players ?? []).filter((p) => p.stats !== undefined).length;
-  }
+  // Unknown winner format - don't display confusing output
+  return undefined;
+}
 
-  private static escapeHtml(value: string): string {
-    return value
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#39;");
-  }
+function countActivePlayers(players: PlayerInfo[] | undefined): number {
+  return (players ?? []).filter((p) => p.stats !== undefined).length;
+}
 
-  private static escapeJsString(value: string): string {
-    return value
-      .replace(/\\/g, "\\\\")
-      .replace(/"/g, '\\"')
-      .replace(/\n/g, "\\n")
-      .replace(/\r/g, "\\r")
-      .replace(/\t/g, "\\t");
-  }
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
 
-  static buildPreview(
-    gameID: string,
-    origin: string,
-    lobby: GameInfo | null,
-    publicInfo: ExternalGameInfo | null,
-  ): PreviewMeta {
+function escapeJsString(value: string): string {
+  return value
+    .replace(/\\/g, "\\\\")
+    .replace(/"/g, '\\"')
+    .replace(/\n/g, "\\n")
+    .replace(/\r/g, "\\r")
+    .replace(/\t/g, "\\t");
+}
+
+export function buildPreview(
+  gameID: string,
+  origin: string,
+  lobby: GameInfo | null,
+  publicInfo: ExternalGameInfo | null,
+): PreviewMeta {
     const isFinished = !!publicInfo?.info?.end;
     const isPrivate = lobby?.gameConfig?.gameType === "Private";
 
@@ -118,7 +117,7 @@ export class GamePreviewBuilder {
     const players = publicInfo?.info?.players ?? [];
 
     const activePlayers = isFinished
-      ? this.countActivePlayers(players)
+      ? countActivePlayers(players)
       : (lobby?.numClients ?? lobby?.clients?.length ?? players.length);
     const maxPlayers = lobby?.gameConfig?.maxPlayers ?? config.maxPlayers;
     const map = lobby?.gameConfig?.gameMap ?? config.gameMap;
@@ -137,7 +136,7 @@ export class GamePreviewBuilder {
 
     const difficulty = lobby?.gameConfig?.difficulty ?? config.difficulty;
     const bots = lobby?.gameConfig?.bots ?? config.bots;
-    const winner = this.parseWinner(publicInfo?.info?.winner, players);
+    const winner = parseWinner(publicInfo?.info?.winner, players);
     const turns = publicInfo?.info?.num_turns;
     const duration = publicInfo?.info?.duration;
 
@@ -157,7 +156,7 @@ export class GamePreviewBuilder {
       const parts: string[] = [];
       if (winner) parts.push(`Winner: ${winner}`);
       if (duration !== undefined)
-        parts.push(`Duration: ${this.formatDuration(duration)}`);
+        parts.push(`Duration: ${formatDuration(duration)}`);
       if (turns !== undefined) parts.push(`Turns: ${turns}`);
       if (difficulty) parts.push(`Difficulty: ${difficulty}`);
       if (bots !== undefined && bots > 0) parts.push(`Bots: ${bots}`);
@@ -218,18 +217,18 @@ export class GamePreviewBuilder {
     return { title, description, image, joinUrl, redirectUrl };
   }
 
-  static renderPreview(
-    meta: PreviewMeta,
-    joinId: string,
-    botRequest: boolean,
-  ): string {
-    const refreshTag = botRequest
-      ? ""
-      : `<meta http-equiv="refresh" content="0; url=${this.escapeHtml(meta.redirectUrl)}">`;
+export function renderPreview(
+  meta: PreviewMeta,
+  joinId: string,
+  botRequest: boolean,
+): string {
+  const refreshTag = botRequest
+    ? ""
+    : `<meta http-equiv="refresh" content="0; url=${escapeHtml(meta.redirectUrl)}">`;
 
-    const redirectScript = botRequest
-      ? ""
-      : `<script>window.location.replace("${this.escapeJsString(meta.redirectUrl)}");</script>`;
+  const redirectScript = botRequest
+    ? ""
+    : `<script>window.location.replace("${escapeJsString(meta.redirectUrl)}");</script>`;
 
     // Parse description sections for structured rendering
     const descriptionLines = meta.description.split("\n");
@@ -245,7 +244,7 @@ export class GamePreviewBuilder {
               .split(" | ")
               .map(
                 (opt) =>
-                  `<span class="badge">${this.escapeHtml(opt.trim())}</span>`,
+                  `<span class="badge">${escapeHtml(opt.trim())}</span>`,
               )
               .join("");
             return `<div class="section"><div class="section-title">Game Options</div><div class="badges">${options}</div></div>`;
@@ -255,7 +254,7 @@ export class GamePreviewBuilder {
               .split(" | ")
               .map(
                 (unit) =>
-                  `<span class="badge badge-disabled">${this.escapeHtml(unit.trim())}</span>`,
+                  `<span class="badge badge-disabled">${escapeHtml(unit.trim())}</span>`,
               )
               .join("");
             return `<div class="section"><div class="section-title">Disabled Units</div><div class="badges">${units}</div></div>`;
@@ -267,7 +266,7 @@ export class GamePreviewBuilder {
         .join("");
     } else {
       // Single line format (public lobby or finished game)
-      descriptionHtml = `<p class="simple-desc">${this.escapeHtml(meta.description)}</p>`;
+      descriptionHtml = `<p class="simple-desc">${escapeHtml(meta.description)}</p>`;
     }
 
     return `<!doctype html>
@@ -275,12 +274,12 @@ export class GamePreviewBuilder {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>${this.escapeHtml(meta.title)}</title>
-    <link rel="canonical" href="${this.escapeHtml(meta.joinUrl)}" />
-    <meta property="og:title" content="${this.escapeHtml(meta.title)}" />
-    <meta property="og:description" content="${this.escapeHtml(meta.description)}" />
-    <meta property="og:image" content="${this.escapeHtml(meta.image)}" />
-    <meta property="og:url" content="${this.escapeHtml(meta.joinUrl)}" />
+    <title>${escapeHtml(meta.title)}</title>
+    <link rel="canonical" href="${escapeHtml(meta.joinUrl)}" />
+    <meta property="og:title" content="${escapeHtml(meta.title)}" />
+    <meta property="og:description" content="${escapeHtml(meta.description)}" />
+    <meta property="og:image" content="${escapeHtml(meta.image)}" />
+    <meta property="og:url" content="${escapeHtml(meta.joinUrl)}" />
     <meta property="og:type" content="website" />
     ${refreshTag}
     <style>
@@ -407,17 +406,14 @@ export class GamePreviewBuilder {
   </head>
   <body>
     <main class="card" role="main">
-      <h1>${this.escapeHtml(meta.title)}</h1>
+      <h1>${escapeHtml(meta.title)}</h1>
       ${descriptionHtml}
       <div class="footer">
         <div class="lobby-code-label">Lobby Code</div>
-        <div class="lobby-code">${this.escapeHtml(joinId)}</div>
+        <div class="lobby-code">${escapeHtml(joinId)}</div>
       </div>
     </main>
     ${redirectScript}
   </body>
 </html>`;
-  }
 }
-
-export type { ExternalGameInfo, PreviewMeta };

@@ -9,7 +9,7 @@ import { WebSocket, WebSocketServer } from "ws";
 import { getServerConfigFromServer } from "../core/configuration/ConfigLoader";
 import { GameInfo, ID } from "../core/Schemas";
 import { generateID } from "../core/Util";
-import { ExternalGameInfo, GamePreviewBuilder } from "./GamePreviewBuilder";
+import { ExternalGameInfo, buildPreview, renderPreview } from "./GamePreviewBuilder";
 import { logger } from "./Logger";
 import { MapPlaylist } from "./MapPlaylist";
 
@@ -133,13 +133,13 @@ const serveJoinPreview = async (
   }
 
   if (botRequest) {
-    const meta = GamePreviewBuilder.buildPreview(
+    const meta = buildPreview(
       joinId,
       origin,
       lobby,
       publicInfo,
     );
-    const html = GamePreviewBuilder.renderPreview(meta, joinId, true);
+    const html = renderPreview(meta, joinId, true);
 
     // Determine if public or private lobby
     const isPrivate = lobby?.gameConfig?.gameType === "Private";
