@@ -274,11 +274,11 @@
   "public_lobby": {
     "join": "Join next Game",
     "waiting": "players waiting",
+    "teams_Duos": "{team_count} of 2 (Duos)",
+    "teams_Trios": "{team_count} of 3 (Trios)",
+    "teams_Quads": "{team_count} of 4 (Quads)",
     "waiting_for_players": "Waiting for players",
     "starting_game": "Starting game…",
-    "teams_Duos": "of 2 (Duos)",
-    "teams_Trios": "of 3 (Trios)",
-    "teams_Quads": "of 4 (Quads)",
     "teams_hvn": "Humans vs Nations",
     "teams_hvn_detailed": "{num} Humans vs {num} Nations",
     "teams": "{num} teams",
@@ -346,7 +346,7 @@
     "code_license": "Code licensed under AGPL-3.0 (no warranty)"
   },
   "difficulty": {
-    "difficulty": "Difficulty",
+    "difficulty": "Nation difficulty",
     "easy": "Easy",
     "medium": "Medium",
     "hard": "Hard",
