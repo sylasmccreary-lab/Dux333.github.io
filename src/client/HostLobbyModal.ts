@@ -91,7 +91,7 @@ export class HostLobbyModal extends LitElement {
 
   private updateUrlWithSuffix(): void {
     this.lobbyUrlSuffix = this.generateUrlSuffix();
-    const newUrl = `${window.location.origin}/game/${this.lobbyId}?lobby?${this.lobbyUrlSuffix}`;
+    const newUrl = `${window.location.origin}/game/${this.lobbyId}?lobby&s=${encodeURIComponent(this.lobbyUrlSuffix)}`;
     history.replaceState(null, "", newUrl);
   }
 
@@ -625,7 +625,7 @@ export class HostLobbyModal extends LitElement {
         history.pushState(
           null,
           "",
-          `${window.location.origin}/game/${this.lobbyId}?lobby?${this.lobbyUrlSuffix}`,
+          `${window.location.origin}/game/${this.lobbyId}?lobby&s=${encodeURIComponent(this.lobbyUrlSuffix)}`,
         );
       })
       .then(() => {
@@ -854,7 +854,7 @@ export class HostLobbyModal extends LitElement {
   private async copyToClipboard() {
     try {
       await navigator.clipboard.writeText(
-        `${location.origin}/game/${this.lobbyId}?lobby?${this.lobbyUrlSuffix}`,
+        `${location.origin}/game/${this.lobbyId}?lobby&s=${encodeURIComponent(this.lobbyUrlSuffix)}`,
       );
       this.copySuccess = true;
       setTimeout(() => {
