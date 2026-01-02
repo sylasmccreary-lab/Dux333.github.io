@@ -644,6 +644,8 @@ export class HostLobbyModal extends LitElement {
       clearTimeout(this.botsUpdateTimer);
       this.botsUpdateTimer = null;
     }
+    // Reset URL to base when modal closes
+    history.replaceState(null, "", window.location.origin + "/");
   }
 
   private async handleRandomMapToggle() {
