@@ -255,8 +255,6 @@ export function renderPreview(
             )
             .join("");
           return `<div class="section"><div class="section-title">Disabled Units</div><div class="badges">${units}</div></div>`;
-        } else if (line === "Join now!") {
-          return `<div class="cta">${escapeHtml(line)}</div>`;
         }
         return `<p>${escapeHtml(line)}</p>`;
       })
