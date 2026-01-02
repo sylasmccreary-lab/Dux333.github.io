@@ -13,6 +13,7 @@ export class JoinPrivateLobbyModal extends LitElement {
   @query("o-modal") private modalEl!: HTMLElement & {
     open: () => void;
     close: () => void;
+    onClose?: () => void;
   };
   @query("#lobbyIdInput") private lobbyIdInput!: HTMLInputElement;
   @state() private message: string = "";
@@ -108,6 +109,9 @@ export class JoinPrivateLobbyModal extends LitElement {
 
   public open(id: string = "") {
     this.modalEl?.open();
+    this.modalEl.onClose = () => {
+      this.close();
+    };
     if (id) {
       this.setLobbyId(id);
       this.joinLobby();
