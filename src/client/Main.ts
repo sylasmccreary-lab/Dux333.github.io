@@ -610,12 +610,6 @@ class Client {
   }
 
   private extractJoinCodeFromUrl(): string | null {
-    const searchParams = new URLSearchParams(window.location.search);
-    const joinFromQuery = searchParams.get("join");
-    if (joinFromQuery && ID.safeParse(joinFromQuery).success) {
-      return joinFromQuery;
-    }
-
     const pathMatch = window.location.pathname.match(
       /^\/game\/([A-Za-z0-9]{8})/,
     );

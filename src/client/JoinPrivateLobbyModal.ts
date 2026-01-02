@@ -159,13 +159,6 @@ export class JoinPrivateLobbyModal extends LitElement {
 
     try {
       const url = new URL(input);
-      const joinParam = url.searchParams.get("join");
-      if (joinParam) return joinParam;
-
-      const hashParams = new URLSearchParams(url.hash.replace(/^#/, ""));
-      const joinFromHash = hashParams.get("join");
-      if (joinFromHash) return joinFromHash;
-
       const match = url.pathname.match(/game\/([A-Za-z0-9]{8})/);
       if (match) return match[1];
 
