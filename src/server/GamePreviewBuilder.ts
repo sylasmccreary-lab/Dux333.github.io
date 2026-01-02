@@ -18,7 +18,6 @@ export type ExternalGameInfo = {
     players?: PlayerInfo[];
     winner?: string[];
     duration?: number;
-    num_turns?: number;
     start?: number;
     end?: number;
     lobbyCreatedAt?: number;
@@ -139,7 +138,6 @@ export function buildPreview(
 
   const bots = lobby?.gameConfig?.bots ?? config.bots;
   const winner = parseWinner(publicInfo?.info?.winner, players);
-  const turns = publicInfo?.info?.num_turns;
   const duration = publicInfo?.info?.duration;
 
   const mapThumbnail = map
@@ -160,7 +158,6 @@ export function buildPreview(
       parts.push(`${winner.count > 1 ? "Winners" : "Winner"}: ${winner.names}`);
     if (duration !== undefined)
       parts.push(`Duration: ${formatDuration(duration)}`);
-    if (turns !== undefined) parts.push(`Turns: ${turns}`);
     if (bots !== undefined && bots > 0) parts.push(`Bots: ${bots}`);
     const playerCount =
       maxPlayers !== undefined
