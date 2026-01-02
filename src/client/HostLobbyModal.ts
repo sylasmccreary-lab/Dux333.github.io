@@ -56,6 +56,7 @@ export class HostLobbyModal extends LitElement {
   @state() private compactMap: boolean = false;
   @state() private lobbyId = "";
   @state() private copySuccess = false;
+  @state() private lobbyUrlSuffix = "";
   @state() private clients: ClientInfo[] = [];
   @state() private useRandomMap: boolean = false;
   @state() private disabledUnits: UnitType[] = [];
@@ -77,6 +78,21 @@ export class HostLobbyModal extends LitElement {
   disconnectedCallback() {
     window.removeEventListener("keydown", this.handleKeyDown);
     super.disconnectedCallback();
+  }
+
+  private generateUrlSuffix(): string {
+    const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+    let result = "";
+    for (let i = 0; i < 5; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+  }
+
+  private updateUrlWithSuffix(): void {
+    this.lobbyUrlSuffix = this.generateUrlSuffix();
+    const newUrl = `${window.location.origin}/game/${this.lobbyId}?lobby?${this.lobbyUrlSuffix}`;
+    history.replaceState(null, "", newUrl);
   }
 
   private handleKeyDown = (e: KeyboardEvent) => {
@@ -603,11 +619,13 @@ export class HostLobbyModal extends LitElement {
       .then((lobby) => {
         this.lobbyId = lobby.gameID;
         crazyGamesSDK.showInviteButton(this.lobbyId);
+        // Generate initial URL suffix
+        this.lobbyUrlSuffix = this.generateUrlSuffix();
         // Update URL when lobby is created
         history.pushState(
           null,
           "",
-          `${window.location.origin}/game/${this.lobbyId}?lobby`,
+          `${window.location.origin}/game/${this.lobbyId}?lobby?${this.lobbyUrlSuffix}`,
         );
       })
       .then(() => {
@@ -796,6 +814,7 @@ export class HostLobbyModal extends LitElement {
         composed: true,
       }),
     );
+    this.updateUrlWithSuffix();
   }
 
   private toggleUnit(unit: UnitType, checked: boolean): void {
@@ -835,7 +854,7 @@ export class HostLobbyModal extends LitElement {
   private async copyToClipboard() {
     try {
       await navigator.clipboard.writeText(
-        `${location.origin}/game/${this.lobbyId}?lobby`,
+        `${location.origin}/game/${this.lobbyId}?lobby?${this.lobbyUrlSuffix}`,
       );
       this.copySuccess = true;
       setTimeout(() => {
