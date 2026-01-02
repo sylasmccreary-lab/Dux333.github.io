@@ -12,7 +12,6 @@ export type ExternalGameInfo = {
       gameMap?: string;
       gameMode?: string;
       gameType?: string;
-      difficulty?: string;
       bots?: number;
       maxPlayers?: number;
     };
@@ -133,7 +132,6 @@ export function buildPreview(
     }
   }
 
-  const difficulty = lobby?.gameConfig?.difficulty ?? config.difficulty;
   const bots = lobby?.gameConfig?.bots ?? config.bots;
   const winner = parseWinner(publicInfo?.info?.winner, players);
   const turns = publicInfo?.info?.num_turns;
@@ -157,7 +155,6 @@ export function buildPreview(
     if (duration !== undefined)
       parts.push(`Duration: ${formatDuration(duration)}`);
     if (turns !== undefined) parts.push(`Turns: ${turns}`);
-    if (difficulty) parts.push(`Difficulty: ${difficulty}`);
     if (bots !== undefined && bots > 0) parts.push(`Bots: ${bots}`);
     const playerCount =
       maxPlayers !== undefined
@@ -183,7 +180,6 @@ export function buildPreview(
       if (gc?.gameMapSize && gc.gameMapSize !== "Normal") {
         gameOptions.push(`${gc.gameMapSize} Map`);
       }
-      if (difficulty) gameOptions.push(difficulty);
       if (gc?.infiniteGold) gameOptions.push("Infinite Gold");
       if (gc?.infiniteTroops) gameOptions.push("Infinite Troops");
       if (gc?.instantBuild) gameOptions.push("Instant Build");
@@ -205,7 +201,6 @@ export function buildPreview(
     } else {
       // Public lobby: basic info
       const parts: string[] = [];
-      if (difficulty) parts.push(difficulty);
       if (bots !== undefined && bots > 0) parts.push(`${bots} bots`);
       description = parts.join(" • ");
     }
