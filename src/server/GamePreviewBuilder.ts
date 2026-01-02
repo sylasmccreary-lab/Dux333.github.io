@@ -57,9 +57,7 @@ function parseWinner(
 
   if (winnerArray[0] === "team" && winnerArray.length >= 3) {
     const playerIds = winnerArray.slice(2);
-    const names = playerIds
-      .map((id) => idToName.get(id) ?? id)
-      .filter(Boolean);
+    const names = playerIds.map((id) => idToName.get(id) ?? id).filter(Boolean);
     return names.length > 0 ? names.join(", ") : undefined;
   }
 
@@ -100,122 +98,121 @@ export function buildPreview(
   lobby: GameInfo | null,
   publicInfo: ExternalGameInfo | null,
 ): PreviewMeta {
-    const isFinished = !!publicInfo?.info?.end;
-    const isPrivate = lobby?.gameConfig?.gameType === "Private";
+  const isFinished = !!publicInfo?.info?.end;
+  const isPrivate = lobby?.gameConfig?.gameType === "Private";
 
-    // Build URLs with state parameter
-    let joinUrl = `${origin}/game/${gameID}`;
-    let redirectUrl = joinUrl;
+  // Build URLs with state parameter
+  let joinUrl = `${origin}/game/${gameID}`;
+  let redirectUrl = joinUrl;
 
-    if (!isFinished && isPrivate) {
-      joinUrl = `${joinUrl}?lobby`;
-    } else if (isFinished) {
-      redirectUrl = `${redirectUrl}?replay`;
-    }
-
-    const config = publicInfo?.info?.config ?? {};
-    const players = publicInfo?.info?.players ?? [];
-
-    const activePlayers = isFinished
-      ? countActivePlayers(players)
-      : (lobby?.numClients ?? lobby?.clients?.length ?? players.length);
-    const maxPlayers = lobby?.gameConfig?.maxPlayers ?? config.maxPlayers;
-    const map = lobby?.gameConfig?.gameMap ?? config.gameMap;
-    let mode =
-      lobby?.gameConfig?.gameMode ?? config.gameMode ?? config.gameType;
-    const playerTeams = lobby?.gameConfig?.playerTeams;
-
-    // Format team mode display
-    if (!isFinished && mode === "Team" && playerTeams) {
-      if (typeof playerTeams === "string") {
-        mode = playerTeams; // e.g., "Quads"
-      } else if (typeof playerTeams === "number") {
-        mode = `${playerTeams} Teams`;
-      }
-    }
-
-    const difficulty = lobby?.gameConfig?.difficulty ?? config.difficulty;
-    const bots = lobby?.gameConfig?.bots ?? config.bots;
-    const winner = parseWinner(publicInfo?.info?.winner, players);
-    const turns = publicInfo?.info?.num_turns;
-    const duration = publicInfo?.info?.duration;
-
-    const mapThumbnail = map
-      ? `${origin}/maps/${encodeURIComponent(map.toLowerCase().replace(/\s+/g, ""))}/thumbnail.webp`
-      : null;
-    const image = mapThumbnail ?? `${origin}/images/GameplayScreenshot.png`;
-
-    const title = isFinished
-      ? `${mode ?? "Game"} on ${map ?? "Unknown Map"}`
-      : mode && map
-        ? `${mode} • ${map}`
-        : "OpenFront Game";
-
-    let description = "";
-    if (isFinished) {
-      const parts: string[] = [];
-      if (winner) parts.push(`Winner: ${winner}`);
-      if (duration !== undefined)
-        parts.push(`Duration: ${formatDuration(duration)}`);
-      if (turns !== undefined) parts.push(`Turns: ${turns}`);
-      if (difficulty) parts.push(`Difficulty: ${difficulty}`);
-      if (bots !== undefined && bots > 0) parts.push(`Bots: ${bots}`);
-      const playerCount =
-        maxPlayers !== undefined
-          ? `${activePlayers}/${maxPlayers}`
-          : `${activePlayers}`;
-      parts.push(`Players: ${playerCount}`);
-      description = parts.join(" • ");
-    } else if (lobby) {
-      const gc = lobby.gameConfig;
-
-      if (isPrivate) {
-        // Private lobby: show detailed game settings
-        const sections: string[] = [];
-
-        // Show host
-        const hostClient = lobby.clients?.[0];
-        if (hostClient?.username) {
-          sections.push(`Host: ${hostClient.username}`);
-        }
-
-        const gameOptions: string[] = [];
-
-        if (gc?.gameMapSize && gc.gameMapSize !== "Normal") {
-          gameOptions.push(`${gc.gameMapSize} Map`);
-        }
-        if (difficulty) gameOptions.push(difficulty);
-        if (gc?.infiniteGold) gameOptions.push("Infinite Gold");
-        if (gc?.infiniteTroops) gameOptions.push("Infinite Troops");
-        if (gc?.instantBuild) gameOptions.push("Instant Build");
-        if (gc?.randomSpawn) gameOptions.push("Random Spawn");
-        if (gc?.disableNations) gameOptions.push("Nations Disabled");
-        if (gc?.donateTroops) gameOptions.push("Troop Donations Enabled");
-
-        if (gameOptions.length > 0) {
-          sections.push(`Game Options: ${gameOptions.join(" | ")}`);
-        }
-
-        if (Array.isArray(gc?.disabledUnits) && gc.disabledUnits.length > 0) {
-          sections.push(
-            `Disabled Units: ${gc.disabledUnits.map(String).join(" | ")}`,
-          );
-        }
-
-        description = sections.join("\n");
-      } else {
-        // Public lobby: basic info
-        const parts: string[] = [];
-        if (difficulty) parts.push(difficulty);
-        if (bots !== undefined && bots > 0) parts.push(`${bots} bots`);
-        description = parts.join(" • ");
-      }
-    } else {
-      description = `Game ${gameID}`;
-    }
-
-    return { title, description, image, joinUrl, redirectUrl };
+  if (!isFinished && isPrivate) {
+    joinUrl = `${joinUrl}?lobby`;
+  } else if (isFinished) {
+    redirectUrl = `${redirectUrl}?replay`;
   }
+
+  const config = publicInfo?.info?.config ?? {};
+  const players = publicInfo?.info?.players ?? [];
+
+  const activePlayers = isFinished
+    ? countActivePlayers(players)
+    : (lobby?.numClients ?? lobby?.clients?.length ?? players.length);
+  const maxPlayers = lobby?.gameConfig?.maxPlayers ?? config.maxPlayers;
+  const map = lobby?.gameConfig?.gameMap ?? config.gameMap;
+  let mode = lobby?.gameConfig?.gameMode ?? config.gameMode ?? config.gameType;
+  const playerTeams = lobby?.gameConfig?.playerTeams;
+
+  // Format team mode display
+  if (!isFinished && mode === "Team" && playerTeams) {
+    if (typeof playerTeams === "string") {
+      mode = playerTeams; // e.g., "Quads"
+    } else if (typeof playerTeams === "number") {
+      mode = `${playerTeams} Teams`;
+    }
+  }
+
+  const difficulty = lobby?.gameConfig?.difficulty ?? config.difficulty;
+  const bots = lobby?.gameConfig?.bots ?? config.bots;
+  const winner = parseWinner(publicInfo?.info?.winner, players);
+  const turns = publicInfo?.info?.num_turns;
+  const duration = publicInfo?.info?.duration;
+
+  const mapThumbnail = map
+    ? `${origin}/maps/${encodeURIComponent(map.toLowerCase().replace(/\s+/g, ""))}/thumbnail.webp`
+    : null;
+  const image = mapThumbnail ?? `${origin}/images/GameplayScreenshot.png`;
+
+  const title = isFinished
+    ? `${mode ?? "Game"} on ${map ?? "Unknown Map"}`
+    : mode && map
+      ? `${mode} • ${map}`
+      : "OpenFront Game";
+
+  let description = "";
+  if (isFinished) {
+    const parts: string[] = [];
+    if (winner) parts.push(`Winner: ${winner}`);
+    if (duration !== undefined)
+      parts.push(`Duration: ${formatDuration(duration)}`);
+    if (turns !== undefined) parts.push(`Turns: ${turns}`);
+    if (difficulty) parts.push(`Difficulty: ${difficulty}`);
+    if (bots !== undefined && bots > 0) parts.push(`Bots: ${bots}`);
+    const playerCount =
+      maxPlayers !== undefined
+        ? `${activePlayers}/${maxPlayers}`
+        : `${activePlayers}`;
+    parts.push(`Players: ${playerCount}`);
+    description = parts.join(" • ");
+  } else if (lobby) {
+    const gc = lobby.gameConfig;
+
+    if (isPrivate) {
+      // Private lobby: show detailed game settings
+      const sections: string[] = [];
+
+      // Show host
+      const hostClient = lobby.clients?.[0];
+      if (hostClient?.username) {
+        sections.push(`Host: ${hostClient.username}`);
+      }
+
+      const gameOptions: string[] = [];
+
+      if (gc?.gameMapSize && gc.gameMapSize !== "Normal") {
+        gameOptions.push(`${gc.gameMapSize} Map`);
+      }
+      if (difficulty) gameOptions.push(difficulty);
+      if (gc?.infiniteGold) gameOptions.push("Infinite Gold");
+      if (gc?.infiniteTroops) gameOptions.push("Infinite Troops");
+      if (gc?.instantBuild) gameOptions.push("Instant Build");
+      if (gc?.randomSpawn) gameOptions.push("Random Spawn");
+      if (gc?.disableNations) gameOptions.push("Nations Disabled");
+      if (gc?.donateTroops) gameOptions.push("Troop Donations Enabled");
+
+      if (gameOptions.length > 0) {
+        sections.push(`Game Options: ${gameOptions.join(" | ")}`);
+      }
+
+      if (Array.isArray(gc?.disabledUnits) && gc.disabledUnits.length > 0) {
+        sections.push(
+          `Disabled Units: ${gc.disabledUnits.map(String).join(" | ")}`,
+        );
+      }
+
+      description = sections.join("\n");
+    } else {
+      // Public lobby: basic info
+      const parts: string[] = [];
+      if (difficulty) parts.push(difficulty);
+      if (bots !== undefined && bots > 0) parts.push(`${bots} bots`);
+      description = parts.join(" • ");
+    }
+  } else {
+    description = `Game ${gameID}`;
+  }
+
+  return { title, description, image, joinUrl, redirectUrl };
+}
 
 export function renderPreview(
   meta: PreviewMeta,
@@ -230,46 +227,45 @@ export function renderPreview(
     ? ""
     : `<script>window.location.replace("${escapeJsString(meta.redirectUrl)}");</script>`;
 
-    // Parse description sections for structured rendering
-    const descriptionLines = meta.description.split("\n");
-    let descriptionHtml = "";
+  // Parse description sections for structured rendering
+  const descriptionLines = meta.description.split("\n");
+  let descriptionHtml = "";
 
-    if (descriptionLines.length > 1) {
-      // Multi-line structured format (private lobby)
-      descriptionHtml = descriptionLines
-        .map((line) => {
-          if (line.startsWith("Game Options:")) {
-            const options = line
-              .replace("Game Options: ", "")
-              .split(" | ")
-              .map(
-                (opt) =>
-                  `<span class="badge">${escapeHtml(opt.trim())}</span>`,
-              )
-              .join("");
-            return `<div class="section"><div class="section-title">Game Options</div><div class="badges">${options}</div></div>`;
-          } else if (line.startsWith("Disabled Units:")) {
-            const units = line
-              .replace("Disabled Units: ", "")
-              .split(" | ")
-              .map(
-                (unit) =>
-                  `<span class="badge badge-disabled">${escapeHtml(unit.trim())}</span>`,
-              )
-              .join("");
-            return `<div class="section"><div class="section-title">Disabled Units</div><div class="badges">${units}</div></div>`;
-          } else if (line === "Join now!") {
-            return `<div class="cta">${this.escapeHtml(line)}</div>`;
-          }
-          return `<p>${this.escapeHtml(line)}</p>`;
-        })
-        .join("");
-    } else {
-      // Single line format (public lobby or finished game)
-      descriptionHtml = `<p class="simple-desc">${escapeHtml(meta.description)}</p>`;
-    }
+  if (descriptionLines.length > 1) {
+    // Multi-line structured format (private lobby)
+    descriptionHtml = descriptionLines
+      .map((line) => {
+        if (line.startsWith("Game Options:")) {
+          const options = line
+            .replace("Game Options: ", "")
+            .split(" | ")
+            .map(
+              (opt) => `<span class="badge">${escapeHtml(opt.trim())}</span>`,
+            )
+            .join("");
+          return `<div class="section"><div class="section-title">Game Options</div><div class="badges">${options}</div></div>`;
+        } else if (line.startsWith("Disabled Units:")) {
+          const units = line
+            .replace("Disabled Units: ", "")
+            .split(" | ")
+            .map(
+              (unit) =>
+                `<span class="badge badge-disabled">${escapeHtml(unit.trim())}</span>`,
+            )
+            .join("");
+          return `<div class="section"><div class="section-title">Disabled Units</div><div class="badges">${units}</div></div>`;
+        } else if (line === "Join now!") {
+          return `<div class="cta">${this.escapeHtml(line)}</div>`;
+        }
+        return `<p>${this.escapeHtml(line)}</p>`;
+      })
+      .join("");
+  } else {
+    // Single line format (public lobby or finished game)
+    descriptionHtml = `<p class="simple-desc">${escapeHtml(meta.description)}</p>`;
+  }
 
-    return `<!doctype html>
+  return `<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
