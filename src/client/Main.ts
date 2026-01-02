@@ -483,7 +483,11 @@ class Client {
       return;
     }
 
-    const lobbyId = this.extractJoinCodeFromUrl();
+    const pathMatch = window.location.pathname.match(
+      /^\/game\/([A-Za-z0-9]{8})/,
+    );
+    const lobbyId =
+      pathMatch && ID.safeParse(pathMatch[1]).success ? pathMatch[1] : null;
     if (lobbyId) {
       this.updateJoinUrlForShare(lobbyId);
       this.joinModal.open(lobbyId);
@@ -607,17 +611,6 @@ class Client {
         history.pushState(null, "", `/game/${lobby.gameID}?live`);
       },
     );
-  }
-
-  private extractJoinCodeFromUrl(): string | null {
-    const pathMatch = window.location.pathname.match(
-      /^\/game\/([A-Za-z0-9]{8})/,
-    );
-    if (pathMatch && ID.safeParse(pathMatch[1]).success) {
-      return pathMatch[1];
-    }
-
-    return null;
   }
 
   private updateJoinUrlForShare(lobbyId: string) {
