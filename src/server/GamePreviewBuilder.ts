@@ -277,6 +277,8 @@ export function renderPreview(
     <meta property="og:title" content="${escapeHtml(meta.title)}" />
     <meta property="og:description" content="${escapeHtml(meta.description)}" />
     <meta property="og:image" content="${escapeHtml(meta.image)}" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
     <meta property="og:url" content="${escapeHtml(meta.joinUrl)}" />
     <meta property="og:type" content="website" />
     ${refreshTag}
