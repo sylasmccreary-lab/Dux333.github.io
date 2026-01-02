@@ -121,6 +121,8 @@ export class JoinPrivateLobbyModal extends LitElement {
       clearInterval(this.playersInterval);
       this.playersInterval = null;
     }
+    // Reset URL to base when modal closes
+    history.replaceState(null, "", window.location.origin);
   }
 
   public closeAndLeave() {

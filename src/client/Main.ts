@@ -359,11 +359,6 @@ class Client {
       }
     });
 
-    // Reset URL to base when join modal closes
-    this.joinModal.addEventListener("close", () => {
-      history.replaceState(null, "", window.location.origin);
-    });
-
     if (this.userSettings.darkMode()) {
       document.documentElement.classList.add("dark");
     } else {
