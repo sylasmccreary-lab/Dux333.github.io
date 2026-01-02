@@ -603,6 +603,8 @@ export class HostLobbyModal extends LitElement {
       .then((lobby) => {
         this.lobbyId = lobby.gameID;
         crazyGamesSDK.showInviteButton(this.lobbyId);
+        // Update URL when lobby is created
+        history.pushState(null, "", `${window.location.origin}/game/${this.lobbyId}?lobby`);
       })
       .then(() => {
         this.dispatchEvent(
