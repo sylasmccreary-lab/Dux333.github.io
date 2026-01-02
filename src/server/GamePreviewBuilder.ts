@@ -44,10 +44,12 @@ function formatDuration(seconds: number | undefined): string {
   return `${secs}s`;
 }
 
+type WinnerInfo = { names: string; count: number };
+
 function parseWinner(
   winnerArray: string[] | undefined,
   players: PlayerInfo[] | undefined,
-): string | undefined {
+): WinnerInfo | undefined {
   if (!winnerArray || winnerArray.length < 2) return undefined;
 
   const idToName = new Map(
@@ -57,12 +59,15 @@ function parseWinner(
   if (winnerArray[0] === "team" && winnerArray.length >= 3) {
     const playerIds = winnerArray.slice(2);
     const names = playerIds.map((id) => idToName.get(id) ?? id).filter(Boolean);
-    return names.length > 0 ? names.join(", ") : undefined;
+    return names.length > 0
+      ? { names: names.join(", "), count: names.length }
+      : undefined;
   }
 
   if (winnerArray[0] === "player" && winnerArray.length >= 2) {
     const clientId = winnerArray[1];
-    return idToName.get(clientId) ?? clientId;
+    const name = idToName.get(clientId) ?? clientId;
+    return { names: name, count: 1 };
   }
 
   // Unknown winner format - don't display confusing output
@@ -151,7 +156,8 @@ export function buildPreview(
   let description = "";
   if (isFinished) {
     const parts: string[] = [];
-    if (winner) parts.push(`Winner: ${winner}`);
+    if (winner)
+      parts.push(`${winner.count > 1 ? "Winners" : "Winner"}: ${winner.names}`);
     if (duration !== undefined)
       parts.push(`Duration: ${formatDuration(duration)}`);
     if (turns !== undefined) parts.push(`Turns: ${turns}`);
