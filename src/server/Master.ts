@@ -9,7 +9,11 @@ import { WebSocket, WebSocketServer } from "ws";
 import { getServerConfigFromServer } from "../core/configuration/ConfigLoader";
 import { GameInfo, ID } from "../core/Schemas";
 import { generateID } from "../core/Util";
-import { ExternalGameInfo, buildPreview, renderPreview } from "./GamePreviewBuilder";
+import {
+  ExternalGameInfo,
+  buildPreview,
+  renderPreview,
+} from "./GamePreviewBuilder";
 import { logger } from "./Logger";
 import { MapPlaylist } from "./MapPlaylist";
 
@@ -133,12 +137,7 @@ const serveJoinPreview = async (
   }
 
   if (botRequest) {
-    const meta = buildPreview(
-      joinId,
-      origin,
-      lobby,
-      publicInfo,
-    );
+    const meta = buildPreview(joinId, origin, lobby, publicInfo);
     const html = renderPreview(meta, joinId, true);
 
     // Determine if public or private lobby
