@@ -89,7 +89,9 @@ function escapeJsString(value: string): string {
     .replace(/"/g, '\\"')
     .replace(/\n/g, "\\n")
     .replace(/\r/g, "\\r")
-    .replace(/\t/g, "\\t");
+    .replace(/\t/g, "\\t")
+    .replace(/</g, "\\x3c")
+    .replace(/\//g, "\\/");
 }
 
 export function buildPreview(
