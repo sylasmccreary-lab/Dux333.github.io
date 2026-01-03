@@ -75,7 +75,7 @@ function parseWinner(
 
 function countActivePlayers(players: PlayerInfo[] | undefined): number {
   return (players ?? []).filter((p) => {
-    if (!p || p.stats == null) return false;
+    if (!p || p.stats === null || p.stats === undefined) return false;
     // Count only when `stats` has at least one property.
     if (typeof p.stats === "object") {
       try {
