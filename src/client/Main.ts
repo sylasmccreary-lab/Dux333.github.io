@@ -612,8 +612,9 @@ class Client {
   }
 
   private updateJoinUrlForShare(lobbyId: string) {
-    const targetUrl = `/game/${lobbyId}`;
-    const currentUrl = window.location.pathname;
+    const search = window.location.search;
+    const targetUrl = `/game/${lobbyId}${search}`;
+    const currentUrl = `${window.location.pathname}${search}`;
 
     if (currentUrl !== targetUrl) {
       history.replaceState(null, "", targetUrl);
