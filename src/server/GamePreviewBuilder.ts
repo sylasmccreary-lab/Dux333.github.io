@@ -132,9 +132,13 @@ export function buildPreview(
 
   let activePlayers: number;
   if (isFinished) {
-    activePlayers = countActivePlayers(publicInfo?.info?.players ?? players ?? []);
+    activePlayers = countActivePlayers(
+      publicInfo?.info?.players ?? players ?? [],
+    );
   } else {
-    activePlayers = countActivePlayers(players) || (lobby?.numClients ?? lobby?.clients?.length ?? 0);
+    activePlayers =
+      countActivePlayers(players) ||
+      (lobby?.numClients ?? lobby?.clients?.length ?? 0);
   }
   const maxPlayers = lobby?.gameConfig?.maxPlayers ?? config.maxPlayers;
   const map = lobby?.gameConfig?.gameMap ?? config.gameMap;
