@@ -170,9 +170,6 @@ const serveJoinPreview = async (
 };
 
 app.get("/game/:gameId", joinPreviewLimiter, (req, res) => {
-  res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
-  res.setHeader("Pragma", "no-cache");
-  res.setHeader("Expires", "0");
   serveJoinPreview(req, res, req.params.gameId).catch((error) => {
     log.error("failed to render join preview", { error });
     res.status(500).send("Unable to render lobby preview");
