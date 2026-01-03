@@ -1,7 +1,7 @@
 import version from "resources/version.txt?raw";
 import { UserMeResponse } from "../core/ApiSchemas";
 import { EventBus } from "../core/EventBus";
-import { GameRecord, GameStartInfo, ID } from "../core/Schemas";
+import { GAME_ID_REGEX, GameRecord, GameStartInfo } from "../core/Schemas";
 import { GameEnv } from "../core/configuration/Config";
 import { getServerConfigFromClient } from "../core/configuration/ConfigLoader";
 import { GameType } from "../core/game/Game";
@@ -408,7 +408,7 @@ class Client {
     // Check if CrazyGames SDK is enabled first (no hash needed in CrazyGames)
     if (crazyGamesSDK.isOnCrazyGames()) {
       const lobbyId = crazyGamesSDK.getInviteGameId();
-      if (lobbyId && ID.safeParse(lobbyId).success) {
+      if (lobbyId && GAME_ID_REGEX.test(lobbyId)) {
         this.joinModal.open(lobbyId);
         console.log(`CrazyGames: joining lobby ${lobbyId} from invite param`);
         return;
@@ -483,11 +483,9 @@ class Client {
       return;
     }
 
-    const pathMatch = window.location.pathname.match(
-      /^\/game\/([A-Za-z0-9]{8})/,
-    );
+    const pathMatch = window.location.pathname.match(/^\/game\/([^/]+)/);
     const lobbyId =
-      pathMatch && ID.safeParse(pathMatch[1]).success ? pathMatch[1] : null;
+      pathMatch && GAME_ID_REGEX.test(pathMatch[1]) ? pathMatch[1] : null;
     if (lobbyId) {
       this.updateJoinUrlForShare(lobbyId);
       this.joinModal.open(lobbyId);
