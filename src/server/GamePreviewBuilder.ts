@@ -167,7 +167,7 @@ export function buildPreview(
         ? `${activePlayers}/${maxPlayers}`
         : `${activePlayers}`;
     parts.push(`Players: ${playerCount}`);
-    description = parts.join(" • ");
+    description = parts.join("\n");
   } else if (lobby) {
     const gc = lobby.gameConfig;
 
