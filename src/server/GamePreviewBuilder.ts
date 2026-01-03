@@ -15,6 +15,7 @@ export type ExternalGameInfo = {
       gameType?: string;
       bots?: number;
       maxPlayers?: number;
+      playerTeams?: number | string;
     };
     players?: PlayerInfo[];
     winner?: string[];
@@ -125,7 +126,7 @@ export function buildPreview(
   const maxPlayers = lobby?.gameConfig?.maxPlayers ?? config.maxPlayers;
   const map = lobby?.gameConfig?.gameMap ?? config.gameMap;
   let mode = lobby?.gameConfig?.gameMode ?? config.gameMode ?? GameMode.FFA;
-  const playerTeams = lobby?.gameConfig?.playerTeams;
+  const playerTeams = lobby?.gameConfig?.playerTeams ?? config.playerTeams;
 
   // Format team mode display
   if (mode === "Team" && playerTeams) {
@@ -163,7 +164,6 @@ export function buildPreview(
       parts.push(`${winner.count > 1 ? "Winners" : "Winner"}: ${winner.names}`);
     if (duration !== undefined)
       parts.push(`Duration: ${formatDuration(duration)}`);
-    if (bots !== undefined && bots > 0) parts.push(`Bots: ${bots}`);
     const playerCount =
       maxPlayers !== undefined
         ? `${activePlayers}/${maxPlayers}`
