@@ -74,7 +74,18 @@ function parseWinner(
 }
 
 function countActivePlayers(players: PlayerInfo[] | undefined): number {
-  return (players ?? []).filter((p) => p.stats !== undefined).length;
+  return (players ?? []).filter((p) => {
+    if (!p || p.stats == null) return false;
+    // Count only when `stats` has at least one property.
+    if (typeof p.stats === "object") {
+      try {
+        return Object.keys(p.stats as Record<string, unknown>).length > 0;
+      } catch (e) {
+        return true;
+      }
+    }
+    return true;
+  }).length;
 }
 
 function escapeHtml(value: string): string {
