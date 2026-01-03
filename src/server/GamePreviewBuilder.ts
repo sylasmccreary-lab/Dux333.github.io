@@ -128,7 +128,7 @@ export function buildPreview(
   const playerTeams = lobby?.gameConfig?.playerTeams;
 
   // Format team mode display
-  if (!isFinished && mode === "Team" && playerTeams) {
+  if (mode === "Team" && playerTeams) {
     if (typeof playerTeams === "string") {
       mode = playerTeams; // e.g., "Quads"
     } else if (typeof playerTeams === "number") {
@@ -153,7 +153,7 @@ export function buildPreview(
   const title = isFinished
     ? `${mode ?? "Game"} on ${map ?? "Unknown Map"}`
     : mode && map
-      ? `${mode} • ${map}`
+      ? `${mode} on ${map}`
       : "OpenFront Game";
 
   let description = "";
