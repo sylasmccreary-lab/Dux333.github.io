@@ -166,13 +166,19 @@ export function buildPreview(
     typeof playerTeams === "number" && playerTeams > 0
       ? playerTeams
       : undefined;
+  const teamBreakdownLabel = numericTeamCount
+    ? `${numericTeamCount} teams of ${Math.max(
+        1,
+        Math.ceil(activePlayers / numericTeamCount),
+      )}`
+    : undefined;
 
   // Format team mode display
   if (mode === "Team" && playerTeams) {
     if (typeof playerTeams === "string") {
       mode = playerTeams; // e.g., "Quads"
     } else if (typeof playerTeams === "number") {
-      mode = `${playerTeams} Teams`;
+      mode = teamBreakdownLabel ?? `${playerTeams} Teams`;
     }
   }
 
@@ -210,12 +216,8 @@ export function buildPreview(
       publicInfo?.info?.end ??
       publicInfo?.info?.lobbyCreatedAt;
     const detailParts: string[] = [];
-    const playerCountLabel = numericTeamCount
-      ? `${numericTeamCount} teams of ${Math.max(
-          1,
-          Math.ceil(activePlayers / numericTeamCount),
-        )}`
-      : maxPlayers !== undefined
+    const playerCountLabel =
+      maxPlayers !== undefined
         ? `${activePlayers}/${maxPlayers}`
         : `${activePlayers}`;
     detailParts.push(`Players: ${playerCountLabel}`);
