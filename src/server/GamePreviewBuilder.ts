@@ -33,8 +33,7 @@ export type PreviewMeta = {
   redirectUrl: string;
 };
 
-function formatDuration(seconds: number | undefined): string {
-  if (seconds === undefined) return "N/A";
+function formatDuration(seconds: number): string {
   const mins = Math.floor(seconds / 60);
   const secs = seconds % 60;
   const hours = Math.floor(mins / 60);
