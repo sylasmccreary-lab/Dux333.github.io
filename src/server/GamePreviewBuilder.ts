@@ -162,6 +162,10 @@ export function buildPreview(
   const map = lobby?.gameConfig?.gameMap ?? config.gameMap;
   let mode = lobby?.gameConfig?.gameMode ?? config.gameMode ?? GameMode.FFA;
   const playerTeams = lobby?.gameConfig?.playerTeams ?? config.playerTeams;
+  const numericTeamCount =
+    typeof playerTeams === "number" && playerTeams > 0
+      ? playerTeams
+      : undefined;
 
   // Format team mode display
   if (mode === "Team" && playerTeams) {
@@ -206,11 +210,15 @@ export function buildPreview(
       publicInfo?.info?.end ??
       publicInfo?.info?.lobbyCreatedAt;
     const detailParts: string[] = [];
-    const playerCount =
-      maxPlayers !== undefined
+    const playerCountLabel = numericTeamCount
+      ? `${numericTeamCount} teams of ${Math.max(
+          1,
+          Math.ceil(activePlayers / numericTeamCount),
+        )}`
+      : maxPlayers !== undefined
         ? `${activePlayers}/${maxPlayers}`
         : `${activePlayers}`;
-    detailParts.push(`Players: ${playerCount}`);
+    detailParts.push(`Players: ${playerCountLabel}`);
     if (duration !== undefined) detailParts.push(`${formatDuration(duration)}`);
     if (matchTimestamp !== undefined) {
       const dateTime = formatDateTimeParts(matchTimestamp);
