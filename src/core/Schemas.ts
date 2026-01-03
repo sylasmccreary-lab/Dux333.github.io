@@ -215,7 +215,7 @@ export const GAME_ID_REGEX = /^[A-Za-z0-9]{8}$/;
 export const isValidGameID = (value: string): boolean =>
   GAME_ID_REGEX.test(value);
 
-export const ID = z.string().regex(GAME_ID_REGEX).length(8);
+export const ID = z.string().regex(GAME_ID_REGEX);
 
 export const AllPlayersStatsSchema = z.record(ID, PlayerStatsSchema);
 
