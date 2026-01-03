@@ -149,10 +149,13 @@ export function buildPreview(
     : null;
   const image = mapThumbnail ?? `${origin}/images/GameplayScreenshot.png`;
 
+  const gameType = lobby?.gameConfig?.gameType ?? config.gameType;
+  const gameTypeLabel = gameType ? ` (${gameType.toLowerCase()})` : "";
+
   const title = isFinished
-    ? `${mode ?? "Game"} on ${map ?? "Unknown Map"}`
+    ? `${mode ?? "Game"} on ${map ?? "Unknown Map"}${gameTypeLabel}`
     : mode && map
-      ? `${mode} on ${map}`
+      ? `${mode} on ${map}${gameTypeLabel}`
       : "OpenFront Game";
 
   let description = "";
