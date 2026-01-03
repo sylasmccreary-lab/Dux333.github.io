@@ -102,11 +102,7 @@ function countActivePlayers(players: PlayerInfo[] | undefined): number {
     if (!p || p.stats === null || p.stats === undefined) return false;
     // Count only when `stats` has at least one property.
     if (typeof p.stats === "object") {
-      try {
-        return Object.keys(p.stats as Record<string, unknown>).length > 0;
-      } catch (e) {
-        return true;
-      }
+      return Object.keys(p.stats as Record<string, unknown>).length > 0;
     }
     return true;
   }).length;
