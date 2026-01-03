@@ -236,7 +236,7 @@ export function renderPreview(
     ? ""
     : `<script>window.location.replace("${escapeJsString(meta.redirectUrl)}");</script>`;
 
-    const fullDescription = escapeHtml(meta.description || meta.title);
+  const fullDescription = escapeHtml(meta.description || meta.title);
 
   // Parse description sections for structured rendering
   const descriptionLines = meta.description.split("\n");
