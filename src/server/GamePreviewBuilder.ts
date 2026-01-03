@@ -261,8 +261,7 @@ export function buildPreview(
       description = sections.join("\n\n");
     } else {
       // Public lobby: basic info
-      const parts: string[] = [];
-      description = parts.join(" • ");
+      description = "";
     }
   } else {
     description = `Game ${gameID}`;
