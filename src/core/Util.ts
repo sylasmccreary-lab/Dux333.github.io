@@ -8,6 +8,7 @@ import {
   GameRecord,
   PartialGameRecord,
   PlayerRecord,
+  ID_LENGTH,
   Turn,
   Winner,
 } from "./Schemas";
@@ -261,7 +262,7 @@ export function assertNever(x: never): never {
 export function generateID(): GameID {
   const nanoid = customAlphabet(
     "123456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ",
-    8,
+    ID_LENGTH,
   );
   return nanoid();
 }

@@ -1,7 +1,12 @@
 import { LitElement, html } from "lit";
 import { customElement, query, state } from "lit/decorators.js";
 import { translateText } from "../client/Utils";
-import { GameInfo, GameRecordSchema } from "../core/Schemas";
+import {
+  GAME_PATH_ID_REGEX,
+  GameInfo,
+  GameRecordSchema,
+  ID_REGEX,
+} from "../core/Schemas";
 import { generateID } from "../core/Util";
 import { getServerConfigFromClient } from "../core/configuration/ConfigLoader";
 import { getApiBase } from "./Api";
@@ -143,7 +148,7 @@ export class JoinPrivateLobbyModal extends LitElement {
   }
 
   private isValidLobbyId(value: string): boolean {
-    return /^[a-zA-Z0-9]{8}$/.test(value);
+    return ID_REGEX.test(value);
   }
 
   private normalizeLobbyId(input: string): string | null {
@@ -165,7 +170,7 @@ export class JoinPrivateLobbyModal extends LitElement {
 
     try {
       const url = new URL(input);
-      const match = url.pathname.match(/game\/([A-Za-z0-9]{8})/);
+      const match = url.pathname.match(GAME_PATH_ID_REGEX);
       if (match) return match[1];
 
       return input;

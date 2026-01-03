@@ -209,10 +209,15 @@ const EmojiSchema = z
   .number()
   .nonnegative()
   .max(flattenedEmojiTable.length - 1);
-export const ID = z
-  .string()
-  .regex(/^[a-zA-Z0-9]+$/)
-  .length(8);
+export const ID_LENGTH = 8;
+const ID_BODY_PATTERN = "[A-Za-z0-9]";
+export const ID_REGEX = new RegExp(`^${ID_BODY_PATTERN}{${ID_LENGTH}}$`);
+export const GAME_PATH_ID_REGEX = new RegExp(
+  `/game/(${ID_BODY_PATTERN}{${ID_LENGTH}})`,
+);
+export const isValidID = (value: string): boolean => ID_REGEX.test(value);
+
+export const ID = z.string().regex(ID_REGEX);
 
 export const AllPlayersStatsSchema = z.record(ID, PlayerStatsSchema);
 
