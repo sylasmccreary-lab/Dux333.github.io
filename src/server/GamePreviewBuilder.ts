@@ -210,7 +210,7 @@ export function buildPreview(
         );
       }
 
-      description = sections.join("\n");
+      description = sections.join("\n\n");
     } else {
       // Public lobby: basic info
       const parts: string[] = [];
