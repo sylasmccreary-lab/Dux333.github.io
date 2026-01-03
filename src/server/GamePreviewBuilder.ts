@@ -13,7 +13,6 @@ export type ExternalGameInfo = {
       gameMap?: string;
       gameMode?: string;
       gameType?: string;
-      bots?: number;
       maxPlayers?: number;
       playerTeams?: number | string;
     };
@@ -137,7 +136,6 @@ export function buildPreview(
     }
   }
 
-  const bots = lobby?.gameConfig?.bots ?? config.bots;
   const winner = parseWinner(publicInfo?.info?.winner, players);
   const duration = publicInfo?.info?.duration;
 
@@ -209,7 +207,6 @@ export function buildPreview(
     } else {
       // Public lobby: basic info
       const parts: string[] = [];
-      if (bots !== undefined && bots > 0) parts.push(`${bots} bots`);
       description = parts.join(" • ");
     }
   } else {
