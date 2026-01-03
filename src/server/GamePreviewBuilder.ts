@@ -120,9 +120,10 @@ export function buildPreview(
   const players = publicInfo?.info?.players ?? [];
 
   // Fall back to lobby/client counts when the players array is not provided.
-  const activePlayers = (players && players.length > 0)
-    ? countActivePlayers(players)
-    : (lobby?.numClients ?? lobby?.clients?.length ?? 0);
+  const activePlayers =
+    players && players.length > 0
+      ? countActivePlayers(players)
+      : (lobby?.numClients ?? lobby?.clients?.length ?? 0);
   const maxPlayers = lobby?.gameConfig?.maxPlayers ?? config.maxPlayers;
   const map = lobby?.gameConfig?.gameMap ?? config.gameMap;
   let mode = lobby?.gameConfig?.gameMode ?? config.gameMode ?? GameMode.FFA;
