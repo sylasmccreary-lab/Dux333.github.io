@@ -212,17 +212,16 @@ export function buildPreview(
       publicInfo?.info?.end ??
       publicInfo?.info?.lobbyCreatedAt;
     const detailParts: string[] = [];
-    if (duration !== undefined)
-      detailParts.push(`Duration: ${formatDuration(duration)}`);
     const playerCount =
       maxPlayers !== undefined
         ? `${activePlayers}/${maxPlayers}`
         : `${activePlayers}`;
     detailParts.push(`Players: ${playerCount}`);
+    if (duration !== undefined) detailParts.push(`${formatDuration(duration)}`);
     if (matchTimestamp !== undefined) {
       const dateTime = formatDateTimeParts(matchTimestamp);
-      detailParts.push(`Date: ${dateTime.date}`);
-      detailParts.push(`Time: ${dateTime.time}`);
+      detailParts.push(`${dateTime.date}`);
+      detailParts.push(`${dateTime.time}`);
     }
     parts.push(detailParts.join(" • "));
     description = parts.join("\n");
