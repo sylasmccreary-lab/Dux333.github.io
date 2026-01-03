@@ -487,7 +487,6 @@ class Client {
     const lobbyId =
       pathMatch && GAME_ID_REGEX.test(pathMatch[1]) ? pathMatch[1] : null;
     if (lobbyId) {
-      this.updateJoinUrlForShare(lobbyId);
       this.joinModal.open(lobbyId);
       console.log(`joining lobby ${lobbyId}`);
       return;
@@ -507,6 +506,7 @@ class Client {
   private async handleJoinLobby(event: CustomEvent<JoinLobbyEvent>) {
     const lobby = event.detail;
     console.log(`joining lobby ${lobby.gameID}`);
+    this.updateJoinUrlForShare(lobby.gameID);
     if (this.gameStop !== null) {
       console.log("joining lobby, stopping existing game");
       this.gameStop();
