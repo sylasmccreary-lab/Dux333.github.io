@@ -60,7 +60,7 @@ const isBotRequest = (req: Request): boolean => {
 
 const requestOrigin = (req: Request): string => {
   const protoHeader = (req.headers["x-forwarded-proto"] as string) ?? "";
-  const proto = (protoHeader.split(",")[0]?.trim() || req.protocol || "https");
+  const proto = protoHeader.split(",")[0]?.trim() || req.protocol || "https";
   const host = req.get("host") ?? `${config.subdomain()}.${config.domain()}`;
   return `${proto}://${host}`;
 };
