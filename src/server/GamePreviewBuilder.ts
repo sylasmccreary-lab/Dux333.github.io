@@ -306,8 +306,9 @@ export function renderPreview(
         border: 1px solid rgba(148, 163, 184, 0.1);
         border-radius: 16px; 
         padding: 2rem; 
-        max-width: 600px; 
+        max-width: 800px; 
         width: 100%;
+        min-width: 420px;
         box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.03);
       }
       h1 { 
