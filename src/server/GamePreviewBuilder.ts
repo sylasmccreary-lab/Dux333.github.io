@@ -141,7 +141,7 @@ export function buildPreview(
   const duration = publicInfo?.info?.duration;
 
   const mapThumbnail = map
-    ? `${origin}/maps/${encodeURIComponent(map.toLowerCase().replace(/\s+/g, ""))}/thumbnail.webp`
+    ? `${origin}/maps/${encodeURIComponent(map.toLowerCase().replace(/\s+/g, "").replace(/[^a-z0-9]/g, ""))}/thumbnail.webp`
     : null;
   const image = mapThumbnail ?? `${origin}/images/GameplayScreenshot.png`;
 
