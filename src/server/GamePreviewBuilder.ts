@@ -236,6 +236,10 @@ export function renderPreview(
     ? ""
     : `<script>window.location.replace("${escapeJsString(meta.redirectUrl)}");</script>`;
 
+  const ogDescription = escapeHtml(
+    (meta.description.split("\n")[0] || meta.title).slice(0, 200),
+  );
+
   // Parse description sections for structured rendering
   const descriptionLines = meta.description.split("\n");
   let descriptionHtml = "";
@@ -268,7 +272,6 @@ export function renderPreview(
       })
       .join("");
   } else {
-    // Single line format (public lobby or finished game)
     descriptionHtml = `<p class="simple-desc">${escapeHtml(meta.description)}</p>`;
   }
 
@@ -280,10 +283,16 @@ export function renderPreview(
     <title>${escapeHtml(meta.title)}</title>
     <link rel="canonical" href="${escapeHtml(meta.joinUrl)}" />
     <meta property="og:title" content="${escapeHtml(meta.title)}" />
-    <meta property="og:description" content="${escapeHtml(meta.description)}" />
+    <meta property="og:description" content="${ogDescription}" />
     <meta property="og:image" content="${escapeHtml(meta.image)}" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="${escapeHtml(meta.image)}" />
+    <meta name="twitter:image:width" content="1200" />
+    <meta name="twitter:image:height" content="630" />
+    <meta name="twitter:description" content="${ogDescription}" />
+    <meta property="og:site_name" content="OpenFront" />
     <meta property="og:url" content="${escapeHtml(meta.joinUrl)}" />
     <meta property="og:type" content="website" />
     ${refreshTag}
