@@ -156,9 +156,7 @@ export function buildPreview(
 
   let activePlayers: number;
   if (isFinished) {
-    activePlayers = countActivePlayers(
-      publicInfo?.info?.players ?? players ?? [],
-    );
+    activePlayers = countActivePlayers(players);
   } else {
     activePlayers =
       countActivePlayers(players) ||
