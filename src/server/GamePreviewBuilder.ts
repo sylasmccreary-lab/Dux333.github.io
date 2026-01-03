@@ -43,6 +43,30 @@ function formatDuration(seconds: number): string {
   return `${secs}s`;
 }
 
+function normalizeTimestamp(timestamp: number): number {
+  return timestamp < 1e12 ? timestamp * 1000 : timestamp;
+}
+
+function formatDateTimeParts(timestamp: number): {
+  date: string;
+  time: string;
+} {
+  const date = new Date(normalizeTimestamp(timestamp));
+  const dateLabel = new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(date);
+  const timeLabel = new Intl.DateTimeFormat("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+    timeZone: "UTC",
+  }).format(date);
+  return { date: dateLabel, time: `${timeLabel} UTC` };
+}
+
 type WinnerInfo = { names: string; count: number };
 
 function parseWinner(
@@ -183,6 +207,10 @@ export function buildPreview(
       parts.push(`${winner.count > 1 ? "Winners" : "Winner"}: ${winner.names}`);
       parts.push(""); // Extra line break after winner
     }
+    const matchTimestamp =
+      publicInfo?.info?.start ??
+      publicInfo?.info?.end ??
+      publicInfo?.info?.lobbyCreatedAt;
     const detailParts: string[] = [];
     if (duration !== undefined)
       detailParts.push(`Duration: ${formatDuration(duration)}`);
@@ -191,6 +219,11 @@ export function buildPreview(
         ? `${activePlayers}/${maxPlayers}`
         : `${activePlayers}`;
     detailParts.push(`Players: ${playerCount}`);
+    if (matchTimestamp !== undefined) {
+      const dateTime = formatDateTimeParts(matchTimestamp);
+      detailParts.push(`Date: ${dateTime.date}`);
+      detailParts.push(`Time: ${dateTime.time}`);
+    }
     parts.push(detailParts.join(" • "));
     description = parts.join("\n");
   } else if (lobby) {
