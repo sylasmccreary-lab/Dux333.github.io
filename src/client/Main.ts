@@ -1,7 +1,7 @@
 import version from "resources/version.txt?raw";
 import { UserMeResponse } from "../core/ApiSchemas";
 import { EventBus } from "../core/EventBus";
-import { GAME_PATH_ID_REGEX, GameRecord, GameStartInfo, ID } from "../core/Schemas";
+import { GameRecord, GameStartInfo, ID } from "../core/Schemas";
 import { GameEnv } from "../core/configuration/Config";
 import { getServerConfigFromClient } from "../core/configuration/ConfigLoader";
 import { GameType } from "../core/game/Game";
@@ -483,7 +483,9 @@ class Client {
       return;
     }
 
-    const pathMatch = window.location.pathname.match(GAME_PATH_ID_REGEX);
+    const pathMatch = window.location.pathname.match(
+      /^\/game\/([A-Za-z0-9]{8})/,
+    );
     const lobbyId =
       pathMatch && ID.safeParse(pathMatch[1]).success ? pathMatch[1] : null;
     if (lobbyId) {
@@ -612,9 +614,8 @@ class Client {
   }
 
   private updateJoinUrlForShare(lobbyId: string) {
-    const search = window.location.search;
-    const targetUrl = `/game/${lobbyId}${search}`;
-    const currentUrl = `${window.location.pathname}${search}`;
+    const targetUrl = `/game/${lobbyId}`;
+    const currentUrl = window.location.pathname;
 
     if (currentUrl !== targetUrl) {
       history.replaceState(null, "", targetUrl);
