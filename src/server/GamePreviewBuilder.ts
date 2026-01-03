@@ -158,15 +158,19 @@ export function buildPreview(
   let description = "";
   if (isFinished) {
     const parts: string[] = [];
-    if (winner)
+    if (winner) {
       parts.push(`${winner.count > 1 ? "Winners" : "Winner"}: ${winner.names}`);
+      parts.push(""); // Extra line break after winner
+    }
+    const detailParts: string[] = [];
     if (duration !== undefined)
-      parts.push(`Duration: ${formatDuration(duration)}`);
+      detailParts.push(`Duration: ${formatDuration(duration)}`);
     const playerCount =
       maxPlayers !== undefined
         ? `${activePlayers}/${maxPlayers}`
         : `${activePlayers}`;
-    parts.push(`Players: ${playerCount}`);
+    detailParts.push(`Players: ${playerCount}`);
+    parts.push(detailParts.join(" • "));
     description = parts.join("\n");
   } else if (lobby) {
     const gc = lobby.gameConfig;
