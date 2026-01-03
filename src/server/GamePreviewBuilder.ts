@@ -150,7 +150,7 @@ export function buildPreview(
   const image = mapThumbnail ?? `${origin}/images/GameplayScreenshot.png`;
 
   const gameType = lobby?.gameConfig?.gameType ?? config.gameType;
-  const gameTypeLabel = gameType ? ` (${gameType.toLowerCase()})` : "";
+  const gameTypeLabel = gameType ? ` (${gameType})` : "";
 
   const title = isFinished
     ? `${mode ?? "Game"} on ${map ?? "Unknown Map"}${gameTypeLabel}`
