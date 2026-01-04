@@ -150,7 +150,6 @@ export function buildPreview(
       countActivePlayers(players) ||
       (lobby?.numClients ?? lobby?.clients?.length ?? 0);
   }
-  const maxPlayers = lobby?.gameConfig?.maxPlayers ?? config.maxPlayers;
   const map = lobby?.gameConfig?.gameMap ?? config.gameMap;
   let mode = lobby?.gameConfig?.gameMode ?? config.gameMode ?? GameMode.FFA;
   const playerTeams = lobby?.gameConfig?.playerTeams ?? config.playerTeams;
@@ -212,11 +211,8 @@ export function buildPreview(
       publicInfo?.info?.end ??
       publicInfo?.info?.lobbyCreatedAt;
     const detailParts: string[] = [];
-    const playerCountLabel =
-      maxPlayers !== undefined
-        ? `${activePlayers}/${maxPlayers}`
-        : `${activePlayers}`;
-    detailParts.push(`Players: ${playerCountLabel}`);
+    const playerCountLabel = `${activePlayers} ${activePlayers === 1 ? "player" : "players"}`;
+    detailParts.push(playerCountLabel);
     if (duration !== undefined) detailParts.push(`${formatDuration(duration)}`);
     if (matchTimestamp !== undefined) {
       const dateTime = formatDateTimeParts(matchTimestamp);
