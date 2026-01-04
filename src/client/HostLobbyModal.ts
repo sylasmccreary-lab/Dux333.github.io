@@ -91,10 +91,13 @@ export class HostLobbyModal extends LitElement {
     return result;
   }
 
-  private constructUrl(): void {
+  private constructUrl(): string {
     this.lobbyUrlSuffix = this.getRandomString();
-    const newUrl = `${window.location.origin}/game/${this.lobbyId}?lobby&s=${encodeURIComponent(this.lobbyUrlSuffix)}`;
-    history.replaceState(null, "", newUrl);
+    return `${window.location.origin}/game/${this.lobbyId}?lobby&s=${encodeURIComponent(this.lobbyUrlSuffix)}`;
+  }
+
+  private updateHistory(url: string): void {
+    history.replaceState(null, "", url);
   }
 
   private handleKeyDown = (e: KeyboardEvent) => {
@@ -666,14 +669,8 @@ export class HostLobbyModal extends LitElement {
       .then((lobby) => {
         this.lobbyId = lobby.gameID;
         crazyGamesSDK.showInviteButton(this.lobbyId);
-        // Generate initial URL suffix
-        this.lobbyUrlSuffix = this.getRandomString();
-        // Update URL when lobby is created
-        history.pushState(
-          null,
-          "",
-          `${window.location.origin}/game/${this.lobbyId}?lobby&s=${encodeURIComponent(this.lobbyUrlSuffix)}`,
-        );
+        const url = this.constructUrl();
+        history.pushState(null, "", url);
       })
       .then(() => {
         this.dispatchEvent(
@@ -884,7 +881,8 @@ export class HostLobbyModal extends LitElement {
         composed: true,
       }),
     );
-    this.constructUrl();
+    const url = this.constructUrl();
+    this.updateHistory(url);
   }
 
   private toggleUnit(unit: UnitType, checked: boolean): void {
