@@ -82,7 +82,7 @@ export class HostLobbyModal extends LitElement {
     super.disconnectedCallback();
   }
 
-  private generateUrlSuffix(): string {
+  private getRandomString(): string {
     const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
     let result = "";
     for (let i = 0; i < 5; i++) {
@@ -91,8 +91,8 @@ export class HostLobbyModal extends LitElement {
     return result;
   }
 
-  private updateUrlWithSuffix(): void {
-    this.lobbyUrlSuffix = this.generateUrlSuffix();
+  private constructUrl(): void {
+    this.lobbyUrlSuffix = this.getRandomString();
     const newUrl = `${window.location.origin}/game/${this.lobbyId}?lobby&s=${encodeURIComponent(this.lobbyUrlSuffix)}`;
     history.replaceState(null, "", newUrl);
   }
@@ -667,7 +667,7 @@ export class HostLobbyModal extends LitElement {
         this.lobbyId = lobby.gameID;
         crazyGamesSDK.showInviteButton(this.lobbyId);
         // Generate initial URL suffix
-        this.lobbyUrlSuffix = this.generateUrlSuffix();
+        this.lobbyUrlSuffix = this.getRandomString();
         // Update URL when lobby is created
         history.pushState(
           null,
@@ -884,7 +884,7 @@ export class HostLobbyModal extends LitElement {
         composed: true,
       }),
     );
-    this.updateUrlWithSuffix();
+    this.constructUrl();
   }
 
   private toggleUnit(unit: UnitType, checked: boolean): void {

@@ -136,10 +136,10 @@ const serveJoinPreview = async (
 
     if (isPrivate) {
       // Private lobby: shorter cache (10 seconds), ETag based on settings
-      const settingsHash = JSON.stringify(lobby?.gameConfig);
+      const settingsJsonString = JSON.stringify(lobby?.gameConfig);
       const etag = crypto
         .createHash("sha256")
-        .update(settingsHash)
+        .update(settingsJsonString)
         .digest("hex");
       res
         .status(200)
