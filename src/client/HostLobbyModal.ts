@@ -20,6 +20,7 @@ import {
   GameConfig,
   GameInfo,
   TeamCountConfig,
+  isValidGameID,
 } from "../core/Schemas";
 import { generateID } from "../core/Util";
 import "./components/baseComponents/Modal";
@@ -671,6 +672,9 @@ export class HostLobbyModal extends LitElement {
     createLobby(this.lobbyCreatorClientID)
       .then((lobby) => {
         this.lobbyId = lobby.gameID;
+        if (!isValidGameID(this.lobbyId)) {
+          throw new Error(`Invalid lobby ID format: ${this.lobbyId}`);
+        }
         crazyGamesSDK.showInviteButton(this.lobbyId);
         const url = this.constructUrl();
         history.pushState(null, "", url);
