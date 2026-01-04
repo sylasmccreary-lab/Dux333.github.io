@@ -34,6 +34,7 @@ export type PreviewMeta = {
 };
 
 function formatDuration(seconds: number): string {
+  if (!Number.isFinite(seconds) || seconds < 0) return "Unknown";
   const mins = Math.floor(seconds / 60);
   const secs = seconds % 60;
   const hours = Math.floor(mins / 60);
