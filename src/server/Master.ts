@@ -19,7 +19,6 @@ import { MapPlaylist } from "./MapPlaylist";
 
 const config = getServerConfigFromServer();
 const playlist = new MapPlaylist();
-
 const readyWorkers = new Set();
 
 const app = express();
