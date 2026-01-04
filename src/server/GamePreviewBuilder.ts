@@ -157,11 +157,15 @@ export function buildPreview(
     typeof playerTeams === "number" && playerTeams > 0
       ? playerTeams
       : undefined;
+
+  // For finished games, show "x teams of y". For lobbies, just show "x teams"
   const teamBreakdownLabel = numericTeamCount
-    ? `${numericTeamCount} teams of ${Math.max(
-        1,
-        Math.ceil(activePlayers / numericTeamCount),
-      )}`
+    ? isFinished
+      ? `${numericTeamCount} teams of ${Math.max(
+          1,
+          Math.ceil(activePlayers / numericTeamCount),
+        )}`
+      : `${numericTeamCount} teams`
     : undefined;
 
   // Format team mode display
