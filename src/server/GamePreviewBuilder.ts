@@ -404,18 +404,6 @@ export function renderPreview(meta: PreviewMeta, joinId: string): string {
         border-color: rgba(239, 68, 68, 0.3);
         color: #fca5a5; 
       }
-      .cta { 
-        margin-top: 1.5rem; 
-        padding: 0.875rem 1.5rem; 
-        background: linear-gradient(135deg, #3b82f6, #2563eb);
-        color: white; 
-        text-align: center; 
-        border-radius: 8px; 
-        font-weight: 600; 
-        font-size: 0.95rem;
-        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-        letter-spacing: 0.025em;
-      }
       .lobby-code { 
         display: inline-flex; 
         align-items: center; 
