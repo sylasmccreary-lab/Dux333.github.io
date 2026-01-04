@@ -20,26 +20,9 @@ import { MapPlaylist } from "./MapPlaylist";
 const config = getServerConfigFromServer();
 const playlist = new MapPlaylist();
 
-const BOT_USER_AGENTS = [
-  "discordbot",
-  "twitterbot",
-  "slackbot",
-  "facebookexternalhit",
-  "linkedinbot",
-  "telegrambot",
-  "applebot",
-  "snapchat",
-  "whatsapp",
-  "pinterestbot",
-];
-
 const joinPreviewLimiter = rateLimit({
   windowMs: 1000, // 1 second
   max: 100, // limit each IP to 100 requests per windowMs
-  skip: (req) => {
-    const ua = req.get("user-agent")?.toLowerCase() ?? "";
-    return BOT_USER_AGENTS.some((bot) => ua.includes(bot));
-  },
 });
 
 const readyWorkers = new Set();
@@ -52,11 +35,6 @@ const log = logger.child({ comp: "m" });
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 app.use(express.json());
-
-const isBotRequest = (req: Request): boolean => {
-  const ua = req.get("user-agent")?.toLowerCase() ?? "";
-  return BOT_USER_AGENTS.some((token) => ua.includes(token));
-};
 
 const requestOrigin = (req: Request): string => {
   const protoHeader = (req.headers["x-forwarded-proto"] as string) ?? "";
@@ -120,53 +98,15 @@ const serveJoinPreview = async (
 
   const joinId = parsed.data;
   const origin = requestOrigin(req);
-  const botRequest = isBotRequest(req);
   const [lobby, publicInfo] = await Promise.all([
     fetchLobbyInfo(joinId),
     fetchPublicGameInfo(joinId),
   ]);
 
-  if (botRequest) {
-    const meta = buildPreview(joinId, origin, lobby, publicInfo);
-    const html = renderPreview(meta, joinId, true);
+  const meta = buildPreview(joinId, origin, lobby, publicInfo);
+  const html = renderPreview(meta, joinId, true);
 
-    // Determine if public or private lobby
-    const isPrivate = lobby?.gameConfig?.gameType === "Private";
-    const isFinished = !!publicInfo?.info?.end;
-
-    if (isPrivate) {
-      // Private lobby: shorter cache (10 seconds), ETag based on settings
-      const settingsJsonString = JSON.stringify(lobby?.gameConfig);
-      const etag = crypto
-        .createHash("sha256")
-        .update(settingsJsonString)
-        .digest("hex");
-      res
-        .status(200)
-        .setHeader("Cache-Control", "public, max-age=10")
-        .setHeader("ETag", `"${etag}"`)
-        .type("html")
-        .send(html);
-    } else {
-      // Public lobby: longer cache (60 seconds), ETag based on gamestate
-      const gamestateHash = isFinished
-        ? JSON.stringify(publicInfo?.info)
-        : JSON.stringify(lobby);
-      const etag = crypto
-        .createHash("sha256")
-        .update(gamestateHash)
-        .digest("hex");
-      res
-        .status(200)
-        .setHeader("Cache-Control", "public, max-age=60")
-        .setHeader("ETag", `"${etag}"`)
-        .type("html")
-        .send(html);
-    }
-    return;
-  }
-
-  res.sendFile(path.join(__dirname, "../../static/index.html"));
+  res.status(200).type("html").send(html);
 };
 
 app.get("/game/:gameId", joinPreviewLimiter, (req, res) => {
