@@ -90,9 +90,13 @@ export class HostLobbyModal extends LitElement {
     ).join("");
   }
 
+  private buildLobbyUrl(): string {
+    return `${window.location.origin}/game/${this.lobbyId}?lobby&s=${encodeURIComponent(this.lobbyUrlSuffix)}`;
+  }
+
   private constructUrl(): string {
     this.lobbyUrlSuffix = this.getRandomString();
-    return `${window.location.origin}/game/${this.lobbyId}?lobby&s=${encodeURIComponent(this.lobbyUrlSuffix)}`;
+    return this.buildLobbyUrl();
   }
 
   private updateHistory(url: string): void {
@@ -920,9 +924,7 @@ export class HostLobbyModal extends LitElement {
 
   private async copyToClipboard() {
     try {
-      await navigator.clipboard.writeText(
-        `${location.origin}/game/${this.lobbyId}?lobby&s=${encodeURIComponent(this.lobbyUrlSuffix)}`,
-      );
+      await navigator.clipboard.writeText(this.buildLobbyUrl());
       this.copySuccess = true;
       setTimeout(() => {
         this.copySuccess = false;
