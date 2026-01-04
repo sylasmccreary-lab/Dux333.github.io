@@ -84,11 +84,10 @@ export class HostLobbyModal extends LitElement {
 
   private getRandomString(): string {
     const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
-    let result = "";
-    for (let i = 0; i < 5; i++) {
-      result += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return result;
+    return Array.from(
+      { length: 5 },
+      () => chars[Math.floor(Math.random() * chars.length)],
+    ).join("");
   }
 
   private constructUrl(): string {
