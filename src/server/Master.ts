@@ -20,11 +20,6 @@ import { MapPlaylist } from "./MapPlaylist";
 const config = getServerConfigFromServer();
 const playlist = new MapPlaylist();
 
-const joinPreviewLimiter = rateLimit({
-  windowMs: 1000, // 1 second
-  max: 100, // limit each IP to 100 requests per windowMs
-});
-
 const readyWorkers = new Set();
 
 const app = express();
@@ -104,12 +99,12 @@ const serveJoinPreview = async (
   ]);
 
   const meta = buildPreview(joinId, origin, lobby, publicInfo);
-  const html = renderPreview(meta, joinId, true);
+  const html = renderPreview(meta, joinId);
 
   res.status(200).type("html").send(html);
 };
 
-app.get("/game/:gameId", joinPreviewLimiter, (req, res) => {
+app.get("/game/:gameId", (req, res) => {
   serveJoinPreview(req, res, req.params.gameId).catch((error) => {
     log.error("failed to render join preview", { error });
     res.status(500).send("Unable to render lobby preview");

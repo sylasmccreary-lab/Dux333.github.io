@@ -100,6 +100,8 @@ function parseWinner(
 function countActivePlayers(players: PlayerInfo[] | undefined): number {
   return (players ?? []).filter((p) => {
     if (!p || p.stats === null || p.stats === undefined) return false;
+    // Exclude NPCs/bots (they don't have clientID)
+    if (!p.clientID) return false;
     // Count only when `stats` has at least one property.
     if (typeof p.stats === "object") {
       return Object.keys(p.stats as Record<string, unknown>).length > 0;
@@ -115,17 +117,6 @@ function escapeHtml(value: string): string {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
-}
-
-function escapeJsString(value: string): string {
-  return value
-    .replace(/\\/g, "\\\\")
-    .replace(/"/g, '\\"')
-    .replace(/\n/g, "\\n")
-    .replace(/\r/g, "\\r")
-    .replace(/\t/g, "\\t")
-    .replace(/</g, "\\x3c")
-    .replace(/\//g, "\\/");
 }
 
 export function buildPreview(
@@ -276,19 +267,7 @@ export function buildPreview(
   return { title, description, image, joinUrl, redirectUrl };
 }
 
-export function renderPreview(
-  meta: PreviewMeta,
-  joinId: string,
-  botRequest: boolean,
-): string {
-  const refreshTag = botRequest
-    ? ""
-    : `<meta http-equiv="refresh" content="0; url=${escapeHtml(meta.redirectUrl)}">`;
-
-  const redirectScript = botRequest
-    ? ""
-    : `<script>window.location.replace("${escapeJsString(meta.redirectUrl)}");</script>`;
-
+export function renderPreview(meta: PreviewMeta, joinId: string): string {
   const fullDescription = escapeHtml(meta.description || meta.title);
 
   // Parse description sections for structured rendering
@@ -347,7 +326,6 @@ export function renderPreview(
     <meta property="og:site_name" content="OpenFront" />
     <meta property="og:url" content="${escapeHtml(meta.joinUrl)}" />
     <meta property="og:type" content="website" />
-    ${refreshTag}
     <style>
       * { box-sizing: border-box; }
       body { 
@@ -480,7 +458,6 @@ export function renderPreview(
         <div class="lobby-code">${escapeHtml(joinId)}</div>
       </div>
     </main>
-    ${redirectScript}
   </body>
 </html>`;
 }
