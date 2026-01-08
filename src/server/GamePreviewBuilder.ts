@@ -129,11 +129,7 @@ export function buildPreview(
   const isPrivate = lobby?.gameConfig?.gameType === "Private";
 
   // Build URLs with state parameter
-  let joinUrl = `${origin}/game/${gameID}`;
-
-  if (!isFinished && isPrivate) {
-    joinUrl = `${joinUrl}?lobby`;
-  }
+  const joinUrl = `${origin}/game/${gameID}`;
 
   const config = publicInfo?.info?.config ?? {};
   const players = publicInfo?.info?.players ?? [];
