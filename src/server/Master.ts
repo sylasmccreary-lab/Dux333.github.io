@@ -9,11 +9,7 @@ import { WebSocket, WebSocketServer } from "ws";
 import { getServerConfigFromServer } from "../core/configuration/ConfigLoader";
 import { GameInfo, ID } from "../core/Schemas";
 import { generateID } from "../core/Util";
-import {
-  ExternalGameInfo,
-  buildPreview,
-  renderPreview,
-} from "./GamePreviewBuilder";
+
 import { logger } from "./Logger";
 import { MapPlaylist } from "./MapPlaylist";
 
@@ -29,88 +25,6 @@ const log = logger.child({ comp: "m" });
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 app.use(express.json());
-
-const requestOrigin = (req: Request): string => {
-  const protoHeader = (req.headers["x-forwarded-proto"] as string) ?? "";
-  const proto = protoHeader.split(",")[0]?.trim() || req.protocol || "https";
-  const host = req.get("host") ?? `${config.subdomain()}.${config.domain()}`;
-  return `${proto}://${host}`;
-};
-
-const fetchLobbyInfo = async (gameID: string): Promise<GameInfo | null> => {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 1500);
-  try {
-    const workerPort = config.workerPort(gameID);
-    const response = await fetch(
-      `http://127.0.0.1:${workerPort}/api/game/${gameID}`,
-      {
-        signal: controller.signal,
-      },
-    );
-    if (!response.ok) return null;
-    const data = (await response.json()) as GameInfo;
-    return data;
-  } catch (error) {
-    log.warn("failed to fetch lobby info", { gameID, error });
-    return null;
-  } finally {
-    clearTimeout(timeout);
-  }
-};
-
-const fetchPublicGameInfo = async (
-  gameID: string,
-): Promise<ExternalGameInfo | null> => {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 1500);
-  try {
-    const apiDomain = config.jwtIssuer();
-    const response = await fetch(`${apiDomain}/game/${gameID}`, {
-      signal: controller.signal,
-    });
-    if (!response.ok) return null;
-    return (await response.json()) as ExternalGameInfo;
-  } catch (error) {
-    log.warn("failed to fetch public game info", { gameID, error });
-    return null;
-  } finally {
-    clearTimeout(timeout);
-  }
-};
-
-const serveJoinPreview = async (
-  req: Request,
-  res: Response,
-  gameID: string,
-): Promise<void> => {
-  const parsed = ID.safeParse(gameID);
-  if (!parsed.success) {
-    res.redirect(302, "/");
-    return;
-  }
-
-  const joinId = parsed.data;
-  const origin = requestOrigin(req);
-  const [lobby, publicInfo] = await Promise.all([
-    fetchLobbyInfo(joinId),
-    fetchPublicGameInfo(joinId),
-  ]);
-
-  const meta = buildPreview(joinId, origin, lobby, publicInfo);
-  const html = renderPreview(meta, joinId);
-
-  res.status(200).type("html").send(html);
-};
-
-app.get("/game/:gameId", async (req, res) => {
-  try {
-    await serveJoinPreview(req, res, req.params.gameId);
-  } catch (error) {
-    log.error("failed to render join preview", { error });
-    res.status(500).send("Unable to render lobby preview");
-  }
-});
 
 app.use(
   "/maps",

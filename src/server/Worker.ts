@@ -12,6 +12,7 @@ import { GameType } from "../core/game/Game";
 import {
   ClientMessageSchema,
   GameID,
+  GameInfo,
   ID,
   PartialGameRecordSchema,
   ServerErrorMessage,
@@ -24,6 +25,11 @@ import { GameManager } from "./GameManager";
 import { getUserMe, verifyClientToken } from "./jwt";
 import { logger } from "./Logger";
 
+import {
+  ExternalGameInfo,
+  buildPreview,
+  renderPreview,
+} from "./GamePreviewBuilder";
 import { GameEnv } from "../core/configuration/Config";
 import { MapPlaylist } from "./MapPlaylist";
 import { PrivilegeRefresher } from "./PrivilegeRefresher";
@@ -35,6 +41,57 @@ const config = getServerConfigFromServer();
 const workerId = parseInt(process.env.WORKER_ID ?? "0");
 const log = logger.child({ comp: `w_${workerId}` });
 const playlist = new MapPlaylist(true);
+
+const requestOrigin = (req: Request): string => {
+  const protoHeader = (req.headers["x-forwarded-proto"] as string) ?? "";
+  const proto = protoHeader.split(",")[0]?.trim() || req.protocol || "https";
+  const host = req.get("host") ?? `${config.subdomain()}.${config.domain()}`;
+  return `${proto}://${host}`;
+};
+
+const fetchPublicGameInfo = async (
+  gameID: string,
+): Promise<ExternalGameInfo | null> => {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 1500);
+  try {
+    const apiDomain = config.jwtIssuer();
+    const response = await fetch(`${apiDomain}/game/${gameID}`, {
+      signal: controller.signal,
+    });
+    if (!response.ok) return null;
+    return (await response.json()) as ExternalGameInfo;
+  } catch (error) {
+    log.warn("failed to fetch public game info", { gameID, error });
+    return null;
+  } finally {
+    clearTimeout(timeout);
+  }
+};
+
+const fetchRemoteLobbyInfo = async (
+  gameID: string,
+): Promise<GameInfo | null> => {
+  const targetWorkerIndex = config.workerIndex(gameID);
+  if (targetWorkerIndex === workerId) return null;
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 1500);
+  try {
+    const workerPort = config.workerPort(gameID);
+    const response = await fetch(
+      `http://127.0.0.1:${workerPort}/api/game/${gameID}`,
+      { signal: controller.signal },
+    );
+    if (!response.ok) return null;
+    return (await response.json()) as GameInfo;
+  } catch (error) {
+    log.warn("failed to fetch remote lobby info", { gameID, error });
+    return null;
+  } finally {
+    clearTimeout(timeout);
+  }
+};
 
 // Worker setup
 export async function startWorker() {
@@ -184,12 +241,41 @@ export async function startWorker() {
   });
 
   app.get("/api/game/:id", async (req, res) => {
-    const game = gm.game(req.params.id);
-    if (game === null) {
-      log.info(`lobby ${req.params.id} not found`);
+    const gameID = req.params.id;
+    const game = gm.game(gameID);
+    const serveHtml = req.accepts(["json", "html"]) === "html";
+
+    let lobby: GameInfo | null = null;
+    if (game) {
+      lobby = game.gameInfo();
+    } else if (serveHtml) {
+      lobby = await fetchRemoteLobbyInfo(gameID);
+    }
+
+    if (!lobby) {
+      if (serveHtml) {
+        return res.redirect(302, "/");
+      }
+      log.info(`lobby ${gameID} not found`);
       return res.status(404).json({ error: "Game not found" });
     }
-    res.json(game.gameInfo());
+
+    if (serveHtml) {
+      try {
+        const origin = requestOrigin(req);
+        const publicInfo = await fetchPublicGameInfo(gameID);
+
+        const meta = buildPreview(gameID, origin, lobby, publicInfo);
+        const html = renderPreview(meta, gameID);
+
+        return res.status(200).type("html").send(html);
+      } catch (error) {
+        log.error("failed to render join preview", { error });
+        return res.status(500).send("Unable to render lobby preview");
+      }
+    }
+
+    res.json(lobby);
   });
 
   app.post("/api/archive_singleplayer_game", async (req, res) => {
