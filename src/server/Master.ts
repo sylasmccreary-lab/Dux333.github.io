@@ -52,7 +52,6 @@ app.use(
     },
   }),
 );
-app.use(express.json());
 
 app.set("trust proxy", 3);
 app.use(
