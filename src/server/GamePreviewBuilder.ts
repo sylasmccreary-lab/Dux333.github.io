@@ -1,4 +1,6 @@
 import { z } from "zod";
+import { GameInfo } from "../core/Schemas";
+import { GameMode } from "../core/game/Game";
 export const ExternalGameInfoSchema = z.object({
   info: z
     .object({
@@ -28,8 +30,6 @@ export const ExternalGameInfoSchema = z.object({
     })
     .optional(),
 });
-import { GameInfo } from "../core/Schemas";
-import { GameMode } from "../core/game/Game";
 
 type PlayerInfo = {
   clientID?: string;
