@@ -261,7 +261,7 @@ export function buildPreview(
     description = `Game ${gameID}`;
   }
 
-  return { title, description, image, joinUrl, redirectUrl };
+  return { title, description, image, joinUrl };
 }
 
 export function renderPreview(meta: PreviewMeta, joinId: string): string {
