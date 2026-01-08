@@ -2,6 +2,7 @@ import compression from "compression";
 import express, { NextFunction, Request, Response } from "express";
 import rateLimit from "express-rate-limit";
 import fs from "fs";
+import { parse } from "node-html-parser";
 import http from "http";
 import ipAnonymize from "ip-anonymize";
 import path from "path";
@@ -312,32 +313,25 @@ export async function startWorker() {
 
         if (filePath) {
           let html = fs.readFileSync(filePath, "utf-8");
-
-          // Inject Meta Tags for Discord/Social Previews
-          const tagsToInject = [
-            `<meta property="og:title" content="${escapeHtml(meta.title)}" />`,
-            `<meta property="og:description" content="${escapeHtml(meta.description || meta.title)}" />`,
-            `<meta property="og:url" content="${escapeHtml(meta.joinUrl)}" />`,
-            `<meta property="og:image" content="${escapeHtml(meta.image)}" />`,
-            `<meta name="twitter:card" content="summary_large_image" />`,
-            `<meta name="twitter:title" content="${escapeHtml(meta.title)}" />`,
-            `<meta name="twitter:description" content="${escapeHtml(meta.description || meta.title)}" />`,
-            `<meta name="twitter:image" content="${escapeHtml(meta.image)}" />`,
-          ].join("\n    ");
-
-          // Remove existing tags and inject ours
-          html = html
-            .replace(/<meta[^>]*property=["']og:title["'][^>]*>/gi, "")
-            .replace(/<meta[^>]*property=["']og:description["'][^>]*>/gi, "")
-            .replace(/<meta[^>]*property=["']og:url["'][^>]*>/gi, "")
-            .replace(/<meta[^>]*property=["']og:image["'][^>]*>/gi, "")
-            .replace(/<meta[^>]*name=["']twitter:title["'][^>]*>/gi, "")
-            .replace(/<meta[^>]*name=["']twitter:description["'][^>]*>/gi, "")
-            .replace(/<meta[^>]*name=["']twitter:image["'][^>]*>/gi, "")
-            .replace(/<meta[^>]*name=["']twitter:card["'][^>]*>/gi, "")
-            .replace("</head>", `${tagsToInject}\n  </head>`);
-
-          return res.status(200).type("html").send(html);
+          const root = parse(html);
+          const head = root.querySelector("head");
+          if (head) {
+            // Remove all existing og:* and twitter:* meta tags
+            head.querySelectorAll('meta[property^="og:"], meta[name^="twitter:"]').forEach((el) => el.remove());
+            // Inject new meta tags
+            const tagsToInject = [
+              `<meta property="og:title" content="${escapeHtml(meta.title)}" />`,
+              `<meta property="og:description" content="${escapeHtml(meta.description || meta.title)}" />`,
+              `<meta property="og:url" content="${escapeHtml(meta.joinUrl)}" />`,
+              `<meta property="og:image" content="${escapeHtml(meta.image)}" />`,
+              `<meta name="twitter:card" content="summary_large_image" />`,
+              `<meta name="twitter:title" content="${escapeHtml(meta.title)}" />`,
+              `<meta name="twitter:description" content="${escapeHtml(meta.description || meta.title)}" />`,
+              `<meta name="twitter:image" content="${escapeHtml(meta.image)}" />`,
+            ];
+            tagsToInject.forEach((tag) => head.insertAdjacentHTML("beforeend", tag));
+          }
+          return res.status(200).type("html").send(root.toString());
         }
       }
 
