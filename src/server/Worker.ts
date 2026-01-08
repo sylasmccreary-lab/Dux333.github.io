@@ -158,6 +158,12 @@ export async function startWorker() {
   app.use(express.json());
   app.use(express.static(path.join(__dirname, "../../out")));
   app.use(
+    "/maps",
+    express.static(path.join(__dirname, "../../resources/maps"), {
+      maxAge: "1y",
+    }),
+  );
+  app.use(
     rateLimit({
       windowMs: 1000, // 1 second
       max: 20, // 20 requests per IP per second
