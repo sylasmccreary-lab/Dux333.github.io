@@ -28,7 +28,7 @@ import { getUserMe, verifyClientToken } from "./jwt";
 import { logger } from "./Logger";
 
 import { GameEnv } from "../core/configuration/Config";
-import { ExternalGameInfo, buildPreview } from "./GamePreviewBuilder";
+import { ExternalGameInfo, buildPreview, ExternalGameInfoSchema } from "./GamePreviewBuilder";
 import { MapPlaylist } from "./MapPlaylist";
 import { PrivilegeRefresher } from "./PrivilegeRefresher";
 import { verifyTurnstileToken } from "./Turnstile";
@@ -66,7 +66,13 @@ const fetchPublicGameInfo = async (
       signal: controller.signal,
     });
     if (!response.ok) return null;
-    return (await response.json()) as ExternalGameInfo;
+    const data = await response.json();
+    const parsed = ExternalGameInfoSchema.safeParse(data);
+    if (!parsed.success) {
+      log.warn("Invalid ExternalGameInfo from API", { gameID, issues: parsed.error.issues });
+      return null;
+    }
+    return parsed.data;
   } catch (error) {
     log.warn("failed to fetch public game info", { gameID, error });
     return null;

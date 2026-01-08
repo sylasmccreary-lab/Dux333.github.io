@@ -1,3 +1,33 @@
+import { z } from "zod";
+export const ExternalGameInfoSchema = z.object({
+  info: z
+    .object({
+      config: z
+        .object({
+          gameMap: z.string().optional(),
+          gameMode: z.string().optional(),
+          gameType: z.string().optional(),
+          maxPlayers: z.number().optional(),
+          playerTeams: z.union([z.number(), z.string()]).optional(),
+        })
+        .optional(),
+      players: z
+        .array(
+          z.object({
+            clientID: z.string().optional(),
+            username: z.string().optional(),
+            stats: z.unknown().optional(),
+          }),
+        )
+        .optional(),
+      winner: z.array(z.string()).optional(),
+      duration: z.number().optional(),
+      start: z.number().optional(),
+      end: z.number().optional(),
+      lobbyCreatedAt: z.number().optional(),
+    })
+    .optional(),
+});
 import { GameInfo } from "../core/Schemas";
 import { GameMode } from "../core/game/Game";
 
