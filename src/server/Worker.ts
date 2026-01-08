@@ -38,6 +38,11 @@ import { initWorkerMetrics } from "./WorkerMetrics";
 
 const config = getServerConfigFromServer();
 
+const gameIDSchema = z
+  .string()
+  .regex(/^[A-Za-z0-9_-]+$/)
+  .max(64);
+
 const workerId = parseInt(process.env.WORKER_ID ?? "0");
 const log = logger.child({ comp: `w_${workerId}` });
 const playlist = new MapPlaylist(true);
@@ -52,6 +57,8 @@ const requestOrigin = (req: Request): string => {
 const fetchPublicGameInfo = async (
   gameID: string,
 ): Promise<ExternalGameInfo | null> => {
+  if (!gameIDSchema.safeParse(gameID).success) return null;
+
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 1500);
   try {
@@ -72,6 +79,8 @@ const fetchPublicGameInfo = async (
 const fetchRemoteLobbyInfo = async (
   gameID: string,
 ): Promise<GameInfo | null> => {
+  if (!gameIDSchema.safeParse(gameID).success) return null;
+
   const targetWorkerIndex = config.workerIndex(gameID);
   if (targetWorkerIndex === workerId) return null;
 
