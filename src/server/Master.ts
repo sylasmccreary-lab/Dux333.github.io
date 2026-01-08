@@ -103,11 +103,13 @@ const serveJoinPreview = async (
   res.status(200).type("html").send(html);
 };
 
-app.get("/game/:gameId", (req, res) => {
-  serveJoinPreview(req, res, req.params.gameId).catch((error) => {
+app.get("/game/:gameId", async (req, res) => {
+  try {
+    await serveJoinPreview(req, res, req.params.gameId);
+  } catch (error) {
     log.error("failed to render join preview", { error });
     res.status(500).send("Unable to render lobby preview");
-  });
+  }
 });
 
 app.use(
