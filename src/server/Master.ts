@@ -1,13 +1,13 @@
 import cluster from "cluster";
 import crypto from "crypto";
-import express, { Request, Response } from "express";
+import express from "express";
 import rateLimit from "express-rate-limit";
 import http from "http";
 import path from "path";
 import { fileURLToPath } from "url";
 import { WebSocket, WebSocketServer } from "ws";
 import { getServerConfigFromServer } from "../core/configuration/ConfigLoader";
-import { GameInfo, ID } from "../core/Schemas";
+import { GameInfo } from "../core/Schemas";
 import { generateID } from "../core/Util";
 
 import { logger } from "./Logger";
