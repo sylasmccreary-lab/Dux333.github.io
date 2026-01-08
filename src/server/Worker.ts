@@ -1,6 +1,7 @@
 import compression from "compression";
 import express, { NextFunction, Request, Response } from "express";
 import rateLimit from "express-rate-limit";
+import fs from "fs";
 import http from "http";
 import ipAnonymize from "ip-anonymize";
 import path from "path";
@@ -287,9 +288,56 @@ export async function startWorker() {
 
       const origin = requestOrigin(req);
       const meta = buildPreview(gameID, origin, lobby, publicInfo);
-      const html = renderPreview(meta, gameID);
 
-      return res.status(200).type("html").send(html);
+      // serve the app but with injected meta tags
+      if (req.accepts(["json", "html"]) === "html") {
+        const staticHtml = path.join(__dirname, "../../static/index.html");
+        const rootHtml = path.join(__dirname, "../../index.html");
+        let filePath: string | null = null;
+
+        if (fs.existsSync(staticHtml)) {
+          filePath = staticHtml;
+        } else if (fs.existsSync(rootHtml)) {
+          filePath = rootHtml;
+        }
+
+        if (filePath) {
+          let html = fs.readFileSync(filePath, "utf-8");
+
+          // Inject Meta Tags for Discord/Social Previews
+          const tagsToInject = [
+            `<meta property="og:title" content="${meta.title.replace(/"/g, '&quot;')}" />`,
+            `<meta property="og:description" content="${(meta.description || meta.title).replace(/"/g, '&quot;')}" />`,
+            `<meta property="og:url" content="${meta.joinUrl}" />`,
+            `<meta property="og:image" content="${meta.image}" />`,
+            `<meta name="twitter:card" content="summary_large_image" />`,
+            `<meta name="twitter:title" content="${meta.title.replace(/"/g, '&quot;')}" />`,
+            `<meta name="twitter:description" content="${(meta.description || meta.title).replace(/"/g, '&quot;')}" />`,
+            `<meta name="twitter:image" content="${meta.image}" />`,
+          ].join("\n    ");
+
+          // Remove existing tags and inject ours
+          html = html
+            .replace(/<meta property="og:title" content="[^"]*" \/>/g, "")
+            .replace(
+              /<meta property="og:description" content="[^"]*" \/>/g,
+              "",
+            )
+            .replace(/<meta property="og:url" content="[^"]*" \/>/g, "")
+            .replace(/<meta property="og:image" content="[^"]*" \/>/g, "")
+            .replace("</head>", `${tagsToInject}\n  </head>`);
+
+          return res.status(200).type("html").send(html);
+        }
+
+        // Fallback to simple render if index.html is missing
+        const html = renderPreview(meta, gameID);
+        return res.status(200).type("html").send(html);
+      }
+
+      // Default to JSON for API consumers
+      res.setHeader("Content-Type", "application/json");
+      return res.send(JSON.stringify(lobby || publicInfo, replacer));
     } catch (error) {
       log.error("failed to render join preview", { error });
       return res.status(500).send("Unable to render lobby preview");
