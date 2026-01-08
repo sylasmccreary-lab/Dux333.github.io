@@ -63,7 +63,8 @@ const fetchPublicGameInfo = async (
   const timeout = setTimeout(() => controller.abort(), 1500);
   try {
     const apiDomain = config.jwtIssuer();
-    const response = await fetch(`${apiDomain}/game/${encodeURIComponent(gameID)}`, {
+    const encodedID = encodeURIComponent(gameID);
+    const response = await fetch(`${apiDomain}/game/${encodedID}`, {
       signal: controller.signal,
     });
     if (!response.ok) return null;
@@ -88,8 +89,9 @@ const fetchRemoteLobbyInfo = async (
   const timeout = setTimeout(() => controller.abort(), 1500);
   try {
     const workerPort = config.workerPort(gameID);
+    const encodedID = encodeURIComponent(gameID);
     const response = await fetch(
-      `http://127.0.0.1:${workerPort}/api/game/${encodeURIComponent(gameID)}`,
+      `http://127.0.0.1:${workerPort}/api/game/${encodedID}`,
       { signal: controller.signal },
     );
     if (!response.ok) return null;
@@ -267,19 +269,16 @@ export async function startWorker() {
       lobby = await fetchRemoteLobbyInfo(gameID);
     }
 
-    if (!lobby) {
-      if (serveHtml) {
-        return res.redirect(302, "/");
-      }
-      log.info(`lobby ${gameID} not found`);
-      return res.status(404).json({ error: "Game not found" });
-    }
-
     if (serveHtml) {
       try {
-        const origin = requestOrigin(req);
-        const publicInfo = await fetchPublicGameInfo(gameID);
+        const publicInfo = await fetchPublicGameInfo(gameID); // Fetch from central API (DB/Auth)
 
+        // If we have neither live lobby info nor archived public info, we can't show anything
+        if (!lobby && !publicInfo) {
+          return res.redirect(302, "/");
+        }
+
+        const origin = requestOrigin(req);
         const meta = buildPreview(gameID, origin, lobby, publicInfo);
         const html = renderPreview(meta, gameID);
 
@@ -288,6 +287,11 @@ export async function startWorker() {
         log.error("failed to render join preview", { error });
         return res.status(500).send("Unable to render lobby preview");
       }
+    }
+
+    if (!lobby) {
+      log.info(`lobby ${gameID} not found`);
+      return res.status(404).json({ error: "Game not found" });
     }
 
     res.json(lobby);
