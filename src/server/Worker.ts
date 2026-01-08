@@ -27,6 +27,8 @@ import { escapeHtml } from "./GamePreviewBuilder";
 import { getUserMe, verifyClientToken } from "./jwt";
 import { logger } from "./Logger";
 
+import { GAME_ID_REGEX } from "../core/Schemas";
+
 import { GameEnv } from "../core/configuration/Config";
 import { ExternalGameInfo, buildPreview, ExternalGameInfoSchema } from "./GamePreviewBuilder";
 import { MapPlaylist } from "./MapPlaylist";
@@ -36,10 +38,7 @@ import { initWorkerMetrics } from "./WorkerMetrics";
 
 const config = getServerConfigFromServer();
 
-const gameIDSchema = z
-  .string()
-  .regex(/^[A-Za-z0-9_-]+$/)
-  .max(64);
+const gameIDSchema = z.string().regex(GAME_ID_REGEX);
 
 const workerId = parseInt(process.env.WORKER_ID ?? "0");
 const log = logger.child({ comp: `w_${workerId}` });
