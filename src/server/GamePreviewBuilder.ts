@@ -259,4 +259,3 @@ export function buildPreview(
 
   return { title, description, image, joinUrl };
 }
-
