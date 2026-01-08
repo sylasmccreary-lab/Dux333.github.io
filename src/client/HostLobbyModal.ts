@@ -671,6 +671,7 @@ export class HostLobbyModal extends LitElement {
       .then((lobby) => {
         this.lobbyId = lobby.gameID;
         if (!isValidGameID(this.lobbyId)) {
+          alert(`Invalid lobby ID format: ${this.lobbyId}`);
           throw new Error(`Invalid lobby ID format: ${this.lobbyId}`);
         }
         crazyGamesSDK.showInviteButton(this.lobbyId);
