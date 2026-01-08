@@ -30,7 +30,6 @@ export type PreviewMeta = {
   description: string;
   image: string;
   joinUrl: string;
-  redirectUrl: string;
 };
 
 function formatDuration(seconds: number): string {
@@ -131,12 +130,9 @@ export function buildPreview(
 
   // Build URLs with state parameter
   let joinUrl = `${origin}/game/${gameID}`;
-  let redirectUrl = joinUrl;
 
   if (!isFinished && isPrivate) {
     joinUrl = `${joinUrl}?lobby`;
-  } else if (isFinished) {
-    redirectUrl = `${redirectUrl}?replay`;
   }
 
   const config = publicInfo?.info?.config ?? {};
