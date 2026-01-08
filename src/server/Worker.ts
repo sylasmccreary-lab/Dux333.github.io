@@ -4,7 +4,6 @@ import rateLimit from "express-rate-limit";
 import fs from "fs";
 import http from "http";
 import ipAnonymize from "ip-anonymize";
-import { escapeHtml } from "./GamePreviewBuilder";
 import path from "path";
 import { fileURLToPath } from "url";
 import { WebSocket, WebSocketServer } from "ws";
@@ -24,14 +23,12 @@ import { CreateGameInputSchema } from "../core/WorkerSchemas";
 import { archive, finalizeGameRecord } from "./Archive";
 import { Client } from "./Client";
 import { GameManager } from "./GameManager";
+import { escapeHtml } from "./GamePreviewBuilder";
 import { getUserMe, verifyClientToken } from "./jwt";
 import { logger } from "./Logger";
 
-import {
-  ExternalGameInfo,
-  buildPreview,
-} from "./GamePreviewBuilder";
 import { GameEnv } from "../core/configuration/Config";
+import { ExternalGameInfo, buildPreview } from "./GamePreviewBuilder";
 import { MapPlaylist } from "./MapPlaylist";
 import { PrivilegeRefresher } from "./PrivilegeRefresher";
 import { verifyTurnstileToken } from "./Turnstile";
@@ -329,7 +326,6 @@ export async function startWorker() {
             .replace("</head>", `${tagsToInject}\n  </head>`);
 
           return res.status(200).type("html").send(html);
-
         }
       }
 
