@@ -339,7 +339,7 @@ export async function startWorker() {
 
       // Default to JSON for API consumers
       res.setHeader("Content-Type", "application/json");
-      return res.send(JSON.stringify(lobby || publicInfo, replacer));
+      return res.send(JSON.stringify(lobby ?? publicInfo, replacer));
     } catch (error) {
       log.error("failed to render join preview", { error });
       return res.status(500).send("Unable to render lobby preview");
