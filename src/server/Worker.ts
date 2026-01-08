@@ -30,7 +30,11 @@ import { logger } from "./Logger";
 import { GAME_ID_REGEX } from "../core/Schemas";
 
 import { GameEnv } from "../core/configuration/Config";
-import { ExternalGameInfo, buildPreview, ExternalGameInfoSchema } from "./GamePreviewBuilder";
+import {
+  buildPreview,
+  ExternalGameInfo,
+  ExternalGameInfoSchema,
+} from "./GamePreviewBuilder";
 import { MapPlaylist } from "./MapPlaylist";
 import { PrivilegeRefresher } from "./PrivilegeRefresher";
 import { verifyTurnstileToken } from "./Turnstile";
@@ -68,7 +72,10 @@ const fetchPublicGameInfo = async (
     const data = await response.json();
     const parsed = ExternalGameInfoSchema.safeParse(data);
     if (!parsed.success) {
-      log.warn("Invalid ExternalGameInfo from API", { gameID, issues: parsed.error.issues });
+      log.warn("Invalid ExternalGameInfo from API", {
+        gameID,
+        issues: parsed.error.issues,
+      });
       return null;
     }
     return parsed.data;
