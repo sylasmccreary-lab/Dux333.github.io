@@ -2,9 +2,9 @@ import compression from "compression";
 import express, { NextFunction, Request, Response } from "express";
 import rateLimit from "express-rate-limit";
 import fs from "fs";
-import { parse } from "node-html-parser";
 import http from "http";
 import ipAnonymize from "ip-anonymize";
+import { parse } from "node-html-parser";
 import path from "path";
 import { fileURLToPath } from "url";
 import { WebSocket, WebSocketServer } from "ws";
@@ -312,12 +312,13 @@ export async function startWorker() {
         }
 
         if (filePath) {
-          let html = fs.readFileSync(filePath, "utf-8");
+          const html = fs.readFileSync(filePath, "utf-8");
           const root = parse(html);
           const head = root.querySelector("head");
           if (head) {
-            // Remove all existing og:* and twitter:* meta tags
-            head.querySelectorAll('meta[property^="og:"], meta[name^="twitter:"]').forEach((el) => el.remove());
+            head
+              .querySelectorAll('meta[property^="og:"], meta[name^="twitter:"]')
+              .forEach((el) => el.remove());
             // Inject new meta tags
             const tagsToInject = [
               `<meta property="og:title" content="${escapeHtml(meta.title)}" />`,
@@ -329,7 +330,9 @@ export async function startWorker() {
               `<meta name="twitter:description" content="${escapeHtml(meta.description || meta.title)}" />`,
               `<meta name="twitter:image" content="${escapeHtml(meta.image)}" />`,
             ];
-            tagsToInject.forEach((tag) => head.insertAdjacentHTML("beforeend", tag));
+            tagsToInject.forEach((tag) =>
+              head.insertAdjacentHTML("beforeend", tag),
+            );
           }
           return res.status(200).type("html").send(root.toString());
         }
