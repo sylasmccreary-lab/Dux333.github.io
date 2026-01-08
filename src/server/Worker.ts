@@ -63,7 +63,7 @@ const fetchPublicGameInfo = async (
   const timeout = setTimeout(() => controller.abort(), 1500);
   try {
     const apiDomain = config.jwtIssuer();
-    const response = await fetch(`${apiDomain}/game/${gameID}`, {
+    const response = await fetch(`${apiDomain}/game/${encodeURIComponent(gameID)}`, {
       signal: controller.signal,
     });
     if (!response.ok) return null;
@@ -89,7 +89,7 @@ const fetchRemoteLobbyInfo = async (
   try {
     const workerPort = config.workerPort(gameID);
     const response = await fetch(
-      `http://127.0.0.1:${workerPort}/api/game/${gameID}`,
+      `http://127.0.0.1:${workerPort}/api/game/${encodeURIComponent(gameID)}`,
       { signal: controller.signal },
     );
     if (!response.ok) return null;
