@@ -65,8 +65,8 @@ const fetchPublicGameInfo = async (
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 1500);
   try {
-    const apiDomain = process.env.API_DOMAIN ?? `api.${config.domain()}`;
-    const response = await fetch(`https://${apiDomain}/game/${gameID}`, {
+    const apiDomain = config.jwtIssuer();
+    const response = await fetch(`${apiDomain}/game/${gameID}`, {
       signal: controller.signal,
     });
     if (!response.ok) return null;
