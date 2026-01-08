@@ -258,43 +258,42 @@ export async function startWorker() {
   });
 
   app.get("/api/game/:id", async (req, res) => {
+    const game = gm.game(req.params.id);
+    if (game === null) {
+      log.info(`lobby ${req.params.id} not found`);
+      return res.status(404).json({ error: "Game not found" });
+    }
+    res.json(game.gameInfo());
+  });
+
+  app.get("/game/:id", async (req, res) => {
     const gameID = req.params.id;
     const game = gm.game(gameID);
-    const serveHtml = req.accepts(["json", "html"]) === "html";
 
     let lobby: GameInfo | null = null;
     if (game) {
       lobby = game.gameInfo();
-    } else if (serveHtml) {
+    } else {
       lobby = await fetchRemoteLobbyInfo(gameID);
     }
 
-    if (serveHtml) {
-      try {
-        const publicInfo = await fetchPublicGameInfo(gameID); // Fetch from central API (DB/Auth)
+    try {
+      const publicInfo = await fetchPublicGameInfo(gameID); // Fetch from central API (DB/Auth)
 
-        // If we have neither live lobby info nor archived public info, we can't show anything
-        if (!lobby && !publicInfo) {
-          return res.redirect(302, "/");
-        }
-
-        const origin = requestOrigin(req);
-        const meta = buildPreview(gameID, origin, lobby, publicInfo);
-        const html = renderPreview(meta, gameID);
-
-        return res.status(200).type("html").send(html);
-      } catch (error) {
-        log.error("failed to render join preview", { error });
-        return res.status(500).send("Unable to render lobby preview");
+      // If we have neither live lobby info nor archived public info, we can't show anything
+      if (!lobby && !publicInfo) {
+        return res.redirect(302, "/");
       }
-    }
 
-    if (!lobby) {
-      log.info(`lobby ${gameID} not found`);
-      return res.status(404).json({ error: "Game not found" });
-    }
+      const origin = requestOrigin(req);
+      const meta = buildPreview(gameID, origin, lobby, publicInfo);
+      const html = renderPreview(meta, gameID);
 
-    res.json(lobby);
+      return res.status(200).type("html").send(html);
+    } catch (error) {
+      log.error("failed to render join preview", { error });
+      return res.status(500).send("Unable to render lobby preview");
+    }
   });
 
   app.post("/api/archive_singleplayer_game", async (req, res) => {
