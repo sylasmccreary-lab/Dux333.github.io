@@ -4,6 +4,7 @@ import rateLimit from "express-rate-limit";
 import fs from "fs";
 import http from "http";
 import ipAnonymize from "ip-anonymize";
+import { escapeHtml } from "./GamePreviewBuilder";
 import path from "path";
 import { fileURLToPath } from "url";
 import { WebSocket, WebSocketServer } from "ws";
@@ -306,25 +307,26 @@ export async function startWorker() {
 
           // Inject Meta Tags for Discord/Social Previews
           const tagsToInject = [
-            `<meta property="og:title" content="${meta.title.replace(/"/g, '&quot;')}" />`,
-            `<meta property="og:description" content="${(meta.description || meta.title).replace(/"/g, '&quot;')}" />`,
-            `<meta property="og:url" content="${meta.joinUrl}" />`,
-            `<meta property="og:image" content="${meta.image}" />`,
+            `<meta property="og:title" content="${escapeHtml(meta.title)}" />`,
+            `<meta property="og:description" content="${escapeHtml(meta.description || meta.title)}" />`,
+            `<meta property="og:url" content="${escapeHtml(meta.joinUrl)}" />`,
+            `<meta property="og:image" content="${escapeHtml(meta.image)}" />`,
             `<meta name="twitter:card" content="summary_large_image" />`,
-            `<meta name="twitter:title" content="${meta.title.replace(/"/g, '&quot;')}" />`,
-            `<meta name="twitter:description" content="${(meta.description || meta.title).replace(/"/g, '&quot;')}" />`,
-            `<meta name="twitter:image" content="${meta.image}" />`,
+            `<meta name="twitter:title" content="${escapeHtml(meta.title)}" />`,
+            `<meta name="twitter:description" content="${escapeHtml(meta.description || meta.title)}" />`,
+            `<meta name="twitter:image" content="${escapeHtml(meta.image)}" />`,
           ].join("\n    ");
 
           // Remove existing tags and inject ours
           html = html
-            .replace(/<meta property="og:title" content="[^"]*" \/>/g, "")
-            .replace(
-              /<meta property="og:description" content="[^"]*" \/>/g,
-              "",
-            )
-            .replace(/<meta property="og:url" content="[^"]*" \/>/g, "")
-            .replace(/<meta property="og:image" content="[^"]*" \/>/g, "")
+            .replace(/<meta[^>]*property=["']og:title["'][^>]*>/gi, "")
+            .replace(/<meta[^>]*property=["']og:description["'][^>]*>/gi, "")
+            .replace(/<meta[^>]*property=["']og:url["'][^>]*>/gi, "")
+            .replace(/<meta[^>]*property=["']og:image["'][^>]*>/gi, "")
+            .replace(/<meta[^>]*name=["']twitter:title["'][^>]*>/gi, "")
+            .replace(/<meta[^>]*name=["']twitter:description["'][^>]*>/gi, "")
+            .replace(/<meta[^>]*name=["']twitter:image["'][^>]*>/gi, "")
+            .replace(/<meta[^>]*name=["']twitter:card["'][^>]*>/gi, "")
             .replace("</head>", `${tagsToInject}\n  </head>`);
 
           return res.status(200).type("html").send(html);
