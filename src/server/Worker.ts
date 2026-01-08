@@ -30,7 +30,6 @@ import { logger } from "./Logger";
 import {
   ExternalGameInfo,
   buildPreview,
-  renderPreview,
 } from "./GamePreviewBuilder";
 import { GameEnv } from "../core/configuration/Config";
 import { MapPlaylist } from "./MapPlaylist";
@@ -330,11 +329,8 @@ export async function startWorker() {
             .replace("</head>", `${tagsToInject}\n  </head>`);
 
           return res.status(200).type("html").send(html);
-        }
 
-        // Fallback to simple render if index.html is missing
-        const html = renderPreview(meta, gameID);
-        return res.status(200).type("html").send(html);
+        }
       }
 
       // Default to JSON for API consumers
