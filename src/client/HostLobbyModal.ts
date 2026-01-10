@@ -75,27 +75,6 @@ export class HostLobbyModal extends BaseModal {
   private userSettings: UserSettings = new UserSettings();
   private mapLoader = terrainMapFileLoader;
 
-  private getRandomString(): string {
-    const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
-    return Array.from(
-      { length: 5 },
-      () => chars[Math.floor(Math.random() * chars.length)],
-    ).join("");
-  }
-
-  private buildLobbyUrl(): string {
-    return `${window.location.origin}/game/${this.lobbyId}?lobby&s=${encodeURIComponent(this.lobbyUrlSuffix)}`;
-  }
-
-  private constructUrl(): string {
-    this.lobbyUrlSuffix = this.getRandomString();
-    return this.buildLobbyUrl();
-  }
-
-  private updateHistory(url: string): void {
-    history.replaceState(null, "", url);
-  }
-
   private renderOptionToggle(
     labelKey: string,
     checked: boolean,
@@ -120,6 +99,27 @@ export class HostLobbyModal extends BaseModal {
         </div>
       </button>
     `;
+  }
+
+  private getRandomString(): string {
+    const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+    return Array.from(
+      { length: 5 },
+      () => chars[Math.floor(Math.random() * chars.length)],
+    ).join("");
+  }
+
+  private buildLobbyUrl(): string {
+    return `${window.location.origin}/game/${this.lobbyId}?lobby&s=${encodeURIComponent(this.lobbyUrlSuffix)}`;
+  }
+
+  private constructUrl(): string {
+    this.lobbyUrlSuffix = this.getRandomString();
+    return this.buildLobbyUrl();
+  }
+
+  private updateHistory(url: string): void {
+    history.replaceState(null, "", url);
   }
 
   render() {
@@ -927,7 +927,7 @@ export class HostLobbyModal extends BaseModal {
   protected onClose(): void {
     console.log("Closing host lobby modal");
     crazyGamesSDK.hideInviteButton();
-    history.replaceState(null, "", "/"); // Reset URL to base
+    this.updateHistory("/"); // Reset URL to base
 
     // Clean up timers and resources
     if (this.playersInterval) {
