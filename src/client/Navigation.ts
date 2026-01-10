@@ -61,6 +61,15 @@ export function initNavigation() {
         // or the max-width wrapper div directly
         const wrapper = mainEl.firstElementChild as HTMLElement;
         if (target === mainEl || (wrapper && target === wrapper)) {
+          // Find and close any open modal before navigating
+          document.querySelectorAll(".page-content").forEach((el) => {
+            if (
+              !el.classList.contains("hidden") &&
+              typeof (el as any).close === "function"
+            ) {
+              (el as any).close();
+            }
+          });
           showPage("page-play");
         }
       }
