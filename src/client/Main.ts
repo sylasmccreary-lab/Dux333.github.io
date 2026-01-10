@@ -664,6 +664,7 @@ class Client {
     if (this.gameStop !== null) {
       console.log("joining lobby, stopping existing game");
       this.gameStop();
+      document.body.classList.remove("in-game");
     }
     const config = await getServerConfigFromClient();
 
@@ -756,6 +757,7 @@ class Client {
 
         crazyGamesSDK.loadingStop();
         crazyGamesSDK.gameplayStart();
+        document.body.classList.add("in-game");
 
         // Ensure there's a homepage entry in history before adding the lobby entry
         if (window.location.hash === "" || window.location.hash === "#") {
@@ -782,6 +784,8 @@ class Client {
     console.log("leaving lobby, cancelling game");
     this.gameStop();
     this.gameStop = null;
+
+    document.body.classList.remove("in-game");
 
     crazyGamesSDK.gameplayStop();
 
