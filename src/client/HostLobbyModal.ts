@@ -1107,6 +1107,8 @@ export class HostLobbyModal extends BaseModal {
     const spawnImmunityTicks = this.spawnImmunityDurationMinutes
       ? this.spawnImmunityDurationMinutes * 60 * 10
       : 0;
+    const url = this.constructUrl();
+    this.updateHistory(url);
     this.dispatchEvent(
       new CustomEvent("update-game-config", {
         detail: {
