@@ -274,6 +274,12 @@ export async function startWorker() {
 
   app.get("/game/:id", async (req, res) => {
     const gameID = req.params.id;
+
+    // Validate gameID format
+    if (!GAME_ID_REGEX.test(gameID)) {
+      return res.status(400).json({ error: "Invalid game ID format" });
+    }
+
     const game = gm.game(gameID);
 
     let lobby: GameInfo | null = null;
