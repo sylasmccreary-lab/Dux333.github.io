@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { GameInfo } from "../core/Schemas";
-import { GameMode } from "../core/game/Game";
+import { GameMapType, GameMode } from "../core/game/Game";
 export const ExternalGameInfoSchema = z.object({
   info: z
     .object({
@@ -202,8 +202,15 @@ export function buildPreview(
   const winner = parseWinner(publicInfo?.info?.winner, players);
   const duration = publicInfo?.info?.duration;
 
-  const mapThumbnail = map
-    ? `${origin}/maps/${encodeURIComponent(map)}/thumbnail.webp`
+  const mapKey = map
+    ? Object.keys(GameMapType).find(
+        (k) => GameMapType[k as keyof typeof GameMapType] === map,
+      )
+    : null;
+  const mapDir = mapKey ? mapKey.toLowerCase() : null;
+
+  const mapThumbnail = mapDir
+    ? `${origin}/maps/${encodeURIComponent(mapDir)}/thumbnail.webp`
     : null;
   const image = mapThumbnail ?? `${origin}/images/GameplayScreenshot.png`;
 
