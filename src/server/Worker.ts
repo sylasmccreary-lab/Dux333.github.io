@@ -1,7 +1,7 @@
 import compression from "compression";
 import express, { NextFunction, Request, Response } from "express";
 import rateLimit from "express-rate-limit";
-import fs from "fs";
+import fsPromises from "fs/promises";
 import http from "http";
 import ipAnonymize from "ip-anonymize";
 import { parse } from "node-html-parser";
@@ -316,14 +316,20 @@ export async function startWorker() {
         const rootHtml = path.join(__dirname, "../../index.html");
         let filePath: string | null = null;
 
-        if (fs.existsSync(staticHtml)) {
+        try {
+          await fsPromises.access(staticHtml);
           filePath = staticHtml;
-        } else if (fs.existsSync(rootHtml)) {
-          filePath = rootHtml;
+        } catch {
+          try {
+            await fsPromises.access(rootHtml);
+            filePath = rootHtml;
+          } catch {
+            // Neither file exists
+          }
         }
 
         if (filePath) {
-          const html = fs.readFileSync(filePath, "utf-8");
+          const html = await fsPromises.readFile(filePath, "utf-8");
           const root = parse(html);
           const head = root.querySelector("head");
           if (head) {
