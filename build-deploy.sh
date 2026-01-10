@@ -57,7 +57,7 @@ SUBDOMAIN="$3"
 
 # Step 1: Run build.sh
 echo "Step 1: Running build.sh..."
-./build.sh "$ENV" "$VERSION_TAG" "$VERSION_TAG"
+./build.sh "$ENV" "$VERSION_TAG"
 
 if [ $? -ne 0 ]; then
     echo "❌ Build failed. Stopping deployment."
