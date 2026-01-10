@@ -3,6 +3,7 @@ import { customElement, query, state } from "lit/decorators.js";
 import { copyToClipboard, translateText } from "../client/Utils";
 import {
   ClientInfo,
+  GAME_ID_REGEX,
   GameConfig,
   GameInfo,
   GameRecordSchema,
@@ -368,6 +369,8 @@ export class JoinPrivateLobbyModal extends BaseModal {
       clearInterval(this.playersInterval);
       this.playersInterval = null;
     }
+    // Reset URL to base when modal closes
+    history.replaceState(null, "", window.location.origin + "/");
   }
 
   public closeAndLeave() {
@@ -392,7 +395,7 @@ export class JoinPrivateLobbyModal extends BaseModal {
   }
 
   private isValidLobbyId(value: string): boolean {
-    return /^[a-zA-Z0-9]{8}$/.test(value);
+    return GAME_ID_REGEX.test(value);
   }
 
   private normalizeLobbyId(input: string): string | null {
@@ -408,16 +411,19 @@ export class JoinPrivateLobbyModal extends BaseModal {
   }
 
   private extractLobbyIdFromUrl(input: string): string {
-    if (input.startsWith("http")) {
-      if (input.includes("#join=")) {
-        const params = new URLSearchParams(input.split("#")[1]);
-        return params.get("join") ?? input;
-      } else if (input.includes("join/")) {
-        return input.split("join/")[1];
-      } else {
-        return input;
-      }
-    } else {
+    if (!input.startsWith("http")) {
+      return input;
+    }
+
+    try {
+      const url = new URL(input);
+      const match = url.pathname.match(/game\/([^/]+)/);
+      const candidate = match?.[1];
+      if (candidate && GAME_ID_REGEX.test(candidate)) return candidate;
+
+      return input;
+    } catch (error) {
+      console.warn("Failed to parse lobby URL", error);
       return input;
     }
   }

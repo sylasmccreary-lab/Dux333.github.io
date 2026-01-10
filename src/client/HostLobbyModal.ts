@@ -21,6 +21,7 @@ import {
   GameConfig,
   GameInfo,
   TeamCountConfig,
+  isValidGameID,
 } from "../core/Schemas";
 import { generateID } from "../core/Util";
 import "./components/baseComponents/Modal";
@@ -60,6 +61,7 @@ export class HostLobbyModal extends BaseModal {
   @state() private compactMap: boolean = false;
   @state() private lobbyId = "";
   @state() private copySuccess = false;
+  @state() private lobbyUrlSuffix = "";
   @state() private clients: ClientInfo[] = [];
   @state() private useRandomMap: boolean = false;
   @state() private disabledUnits: UnitType[] = [];
@@ -72,6 +74,27 @@ export class HostLobbyModal extends BaseModal {
   private botsUpdateTimer: number | null = null;
   private userSettings: UserSettings = new UserSettings();
   private mapLoader = terrainMapFileLoader;
+
+  private getRandomString(): string {
+    const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+    return Array.from(
+      { length: 5 },
+      () => chars[Math.floor(Math.random() * chars.length)],
+    ).join("");
+  }
+
+  private buildLobbyUrl(): string {
+    return `${window.location.origin}/game/${this.lobbyId}?lobby&s=${encodeURIComponent(this.lobbyUrlSuffix)}`;
+  }
+
+  private constructUrl(): string {
+    this.lobbyUrlSuffix = this.getRandomString();
+    return this.buildLobbyUrl();
+  }
+
+  private updateHistory(url: string): void {
+    history.replaceState(null, "", url);
+  }
 
   private renderOptionToggle(
     labelKey: string,
@@ -826,7 +849,12 @@ export class HostLobbyModal extends BaseModal {
     createLobby(this.lobbyCreatorClientID)
       .then((lobby) => {
         this.lobbyId = lobby.gameID;
+        if (!isValidGameID(this.lobbyId)) {
+          throw new Error(`Invalid lobby ID format: ${this.lobbyId}`);
+        }
         crazyGamesSDK.showInviteButton(this.lobbyId);
+        const url = this.constructUrl();
+        this.updateHistory(url);
       })
       .then(() => {
         this.dispatchEvent(
@@ -899,6 +927,7 @@ export class HostLobbyModal extends BaseModal {
   protected onClose(): void {
     console.log("Closing host lobby modal");
     crazyGamesSDK.hideInviteButton();
+    history.replaceState(null, "", "/"); // Reset URL to base
 
     // Clean up timers and resources
     if (this.playersInterval) {
@@ -1152,7 +1181,7 @@ export class HostLobbyModal extends BaseModal {
 
   private async copyToClipboard() {
     await copyToClipboard(
-      `${location.origin}/#join=${this.lobbyId}`,
+      this.buildLobbyUrl(),
       () => (this.copySuccess = true),
       () => (this.copySuccess = false),
     );
