@@ -360,21 +360,10 @@ export class JoinPrivateLobbyModal extends BaseModal {
     }
   }
 
-  protected onClose(): void {
-    if (this.lobbyIdInput) this.lobbyIdInput.value = "";
-    this.currentLobbyId = "";
-    this.gameConfig = null;
-    this.players = [];
-    if (this.playersInterval) {
-      clearInterval(this.playersInterval);
-      this.playersInterval = null;
+  private leaveLobby() {
+    if (!this.currentLobbyId || !this.hasJoined) {
+      return;
     }
-    // Reset URL to base when modal closes
-    history.replaceState(null, "", window.location.origin + "/");
-  }
-
-  public closeAndLeave() {
-    this.close();
     this.hasJoined = false;
     this.message = "";
     this.dispatchEvent(
@@ -384,6 +373,24 @@ export class JoinPrivateLobbyModal extends BaseModal {
         composed: true,
       }),
     );
+  }
+
+  protected onClose(): void {
+    if (this.lobbyIdInput) this.lobbyIdInput.value = "";
+    this.gameConfig = null;
+    this.players = [];
+    if (this.playersInterval) {
+      clearInterval(this.playersInterval);
+      this.playersInterval = null;
+    }
+    // Reset URL to base when modal closes
+    history.replaceState(null, "", window.location.origin + "/");
+    this.leaveLobby();
+    this.currentLobbyId = "";
+  }
+
+  public closeAndLeave() {
+    this.close();
   }
 
   private async copyToClipboard() {

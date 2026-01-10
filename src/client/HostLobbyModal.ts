@@ -926,6 +926,7 @@ export class HostLobbyModal extends BaseModal {
 
   protected onClose(): void {
     console.log("Closing host lobby modal");
+    this.leaveLobby();
     crazyGamesSDK.hideInviteButton();
     this.updateHistory("/"); // Reset URL to base
 
