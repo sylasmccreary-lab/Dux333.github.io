@@ -136,7 +136,7 @@ function countActivePlayers(players: PlayerInfo[] | undefined): number {
     if (typeof p.stats === "object") {
       return Object.keys(p.stats as Record<string, unknown>).length > 0;
     }
-    return true;
+    return false;
   }).length;
 }
 
