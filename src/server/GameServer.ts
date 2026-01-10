@@ -475,9 +475,9 @@ export class GameServer {
         clientID: client.clientID,
         persistentID: client.persistentID,
       });
-      this.activeClients = this.activeClients.filter(
-        (c) => c.clientID !== client.clientID,
-      );
+      this.markClientDisconnected(client.clientID, true);
+      // Don't immediately remove from activeClients - they might reconnect
+      // The 60-second ping timeout will clean up truly disconnected players
     });
     client.ws.on("error", (error: Error) => {
       if ((error as any).code === "WS_ERR_UNEXPECTED_RSV_1") {
@@ -809,6 +809,10 @@ export class GameServer {
       const isDisconnected = this.isClientDisconnected(clientID);
       if (!isDisconnected && now - client.lastPing > this.disconnectedTimeout) {
         this.markClientDisconnected(clientID, true);
+        // Remove from activeClients after timeout
+        this.activeClients = this.activeClients.filter(
+          (c) => c.clientID !== clientID,
+        );
       } else if (
         isDisconnected &&
         now - client.lastPing < this.disconnectedTimeout
