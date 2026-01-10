@@ -131,6 +131,19 @@ export type PlayerColor = z.infer<typeof PlayerColorSchema>;
 export type Flag = z.infer<typeof FlagSchema>;
 export type GameStartInfo = z.infer<typeof GameStartInfoSchema>;
 
+const ClientInfoSchema = z.object({
+  clientID: z.string(),
+  username: z.string(),
+});
+
+export const GameInfoSchema = z.object({
+  gameID: z.string(),
+  clients: z.array(ClientInfoSchema).optional(),
+  numClients: z.number().optional(),
+  msUntilStart: z.number().optional(),
+  gameConfig: z.lazy(() => GameConfigSchema).optional(),
+});
+
 export interface GameInfo {
   gameID: GameID;
   clients?: ClientInfo[];

@@ -15,6 +15,7 @@ import {
   ClientMessageSchema,
   GameID,
   GameInfo,
+  GameInfoSchema,
   ID,
   PartialGameRecordSchema,
   ServerErrorMessage,
@@ -106,7 +107,16 @@ const fetchRemoteLobbyInfo = async (
       { signal: controller.signal },
     );
     if (!response.ok) return null;
-    return (await response.json()) as GameInfo;
+    const data = await response.json();
+    const parsed = GameInfoSchema.safeParse(data);
+    if (!parsed.success) {
+      log.warn("failed to validate remote lobby info", {
+        gameID,
+        issues: parsed.error.issues,
+      });
+      return null;
+    }
+    return parsed.data;
   } catch (error) {
     log.warn("failed to fetch remote lobby info", { gameID, error });
     return null;
