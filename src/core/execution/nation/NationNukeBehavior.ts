@@ -125,7 +125,8 @@ export class NationNukeBehavior {
       // On Hard & Impossible, avoid trajectories that can be intercepted by enemy SAMs
       if (
         (difficulty === Difficulty.Hard ||
-          difficulty === Difficulty.Impossible) &&
+          difficulty === Difficulty.Impossible ||
+        difficulty === Difficulty.Medium) &&
         this.isTrajectoryInterceptableBySam(spawnTile, tile)
       ) {
         continue;
@@ -151,7 +152,7 @@ export class NationNukeBehavior {
 
     // On impossible difficulty, prioritize nuking the crown if they have more than 50% of the map
     const { difficulty, gameMode } = this.game.config().gameConfig();
-    if (difficulty === Difficulty.Impossible && gameMode === GameMode.FFA) {
+    if (difficulty === Difficulty.Impossible || difficulty === Difficulty.Medium && gameMode === GameMode.FFA) {
       const numTilesWithoutFallout =
         this.game.numLandTiles() - this.game.numTilesWithFallout();
       if (numTilesWithoutFallout > 0) {
@@ -369,7 +370,8 @@ export class NationNukeBehavior {
     const difficulty = this.game.config().gameConfig().difficulty;
     if (
       (difficulty === Difficulty.Hard ||
-        difficulty === Difficulty.Impossible) &&
+        difficulty === Difficulty.Impossible ||
+      difficulty === Difficulty.Medium) &&
       this.isUnderHeavyAttack()
     ) {
       return this.cost(type);

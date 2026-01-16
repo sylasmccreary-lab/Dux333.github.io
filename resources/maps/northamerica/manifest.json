@@ -69,12 +69,12 @@
     {
       "coordinates": [467, 333],
       "flag": "Alaska",
-      "name": "Alaska"
+      "name": "US Military Remnants"
     },
     {
       "coordinates": [1154, 914],
       "flag": "Arizona",
-      "name": "Arizona"
+      "name": "Caesar's Legion"
     },
     {
       "coordinates": [1010, 865],
@@ -84,7 +84,7 @@
     {
       "coordinates": [1307, 863],
       "flag": "Colorado",
-      "name": "Caesar's Legion"
+      "name": "Colorado"
     },
     {
       "coordinates": [1673, 965],

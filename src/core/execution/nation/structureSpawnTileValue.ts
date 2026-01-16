@@ -11,7 +11,7 @@ export function structureSpawnTileValue(
   const otherUnits = player.units(type);
   // Prefer spacing structures out of atom bomb range
   const borderSpacing = mg.config().nukeMagnitudes(UnitType.AtomBomb).outer;
-  const structureSpacing = borderSpacing * 2;
+  const structureSpacing = borderSpacing * 1.2;
   switch (type) {
     case UnitType.City:
     case UnitType.Factory:
@@ -20,22 +20,10 @@ export function structureSpawnTileValue(
         let w = 0;
 
         // Prefer higher elevations
-        w += mg.magnitude(tile);
+       
 
         // Prefer to be away from the border
-        const [, closestBorderDist] = closestTile(mg, borderTiles, tile);
-        w += Math.min(closestBorderDist, borderSpacing);
-
-        // Prefer to be away from other structures of the same type
-        const otherTiles: Set<TileRef> = new Set(
-          otherUnits.map((u) => u.tile()),
-        );
-        otherTiles.delete(tile);
-        const closestOther = closestTwoTiles(mg, otherTiles, [tile]);
-        if (closestOther !== null) {
-          const d = mg.manhattanDist(closestOther.x, tile);
-          w += Math.min(d, structureSpacing);
-        }
+        
 
         // TODO: Cities and factories should consider train range limits
         return w;

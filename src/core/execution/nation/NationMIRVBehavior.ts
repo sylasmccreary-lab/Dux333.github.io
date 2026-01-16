@@ -32,7 +32,7 @@ export class NationMIRVBehavior {
       case Difficulty.Easy:
         return 2; // More likely to hesitate
       case Difficulty.Medium:
-        return 4;
+        return 9;
       case Difficulty.Hard:
         return 8;
       case Difficulty.Impossible:
@@ -48,7 +48,7 @@ export class NationMIRVBehavior {
       case Difficulty.Easy:
         return 0.9; // Only react right before the game ends (95%)
       case Difficulty.Medium:
-        return 0.8;
+        return 0.7;
       case Difficulty.Hard:
         return 0.7;
       case Difficulty.Impossible:
@@ -64,7 +64,7 @@ export class NationMIRVBehavior {
       case Difficulty.Easy:
         return 0.75; // Only react right before the game ends (80%)
       case Difficulty.Medium:
-        return 0.65;
+        return 0.55;
       case Difficulty.Hard:
         return 0.55;
       case Difficulty.Impossible:
